@@ -1,4 +1,4 @@
-import { User } from '../entities/User'; // Adjust the path to your User entity
+import { User } from '@/entities/User';
 import { Factory, times } from 'typeorm-seeding';
 
 export default class UserFactory {
