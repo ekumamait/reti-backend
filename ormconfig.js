@@ -1,0 +1,15 @@
+module.exports = {
+  name: 'default',
+  type: 'postgres',
+  host: process.env.DATABASE_HOST,
+  port: Number(process.env.DATABASE_PORT),
+  username: process.env.DATABASE_USERNAME,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_NAME,
+  synchronize: true,
+  logging: false,
+  entities: ['src/**/*.entity.ts'],
+  migrations: ['src/db/migrations/*.ts'],
+  seeds: ['src/db/seeds/*.ts'],
+  factories: ['src/db/factories/*.ts'],
+};
