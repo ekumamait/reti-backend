@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { User } from '../db/entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { UserDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -23,13 +28,23 @@ export class UsersService {
     return this.userRepository.find();
   }
 
-  async findOne(id: number): Promise<User> {
+  async findOne(id: number): Promise<UserDto> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) throw new NotFoundException(`User with id ${id} not found`);
     return user;
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    const existingUser = await this.userRepository.findOne({
+      where: { email: createUserDto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException(
+        `User with email ${createUserDto.email} already exists`,
+      );
+    }
+
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(
       createUserDto.password,
@@ -42,7 +57,10 @@ export class UsersService {
     return this.userRepository.save(newUser);
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UpdateUserDto> {
     if (updateUserDto.password) {
       const saltRounds = 10;
       updateUserDto.password = await bcrypt.hash(
@@ -54,7 +72,7 @@ export class UsersService {
     return this.findOne(id);
   }
 
-  async delete(id: number): Promise<User> {
+  async delete(id: number): Promise<UserDto> {
     const removedUser = await this.findOne(id);
     await this.userRepository.delete(id);
     return removedUser;
