@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 import UserSeed from './seeds/UserSeed';
-import { User } from './entities/User';
+import { User } from './entities/user.entity';
 import { AppDataSource } from '../data-source';
 
 // Load environment variables

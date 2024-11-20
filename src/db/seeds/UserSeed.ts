@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { User } from '../entities/User';
+import { User } from '../entities/user.entity';
 import { faker } from '@faker-js/faker';
 
 export default class UserSeed {
