@@ -57,7 +57,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 
 # Ignore user-related files and directories
-src/users/
+# src/users/
 
 # Ignore generated migration files
 db/migrations/
