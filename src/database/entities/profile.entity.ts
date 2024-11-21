@@ -24,16 +24,16 @@ export class Profile {
   @Column({ nullable: true })
   profileImage: string;
 
-  @Column('simple-array', { nullable: true })
+  @Column('text', { array: true, nullable: true, default: [] })
   skills: string[];
 
-  @Column('simple-json', { nullable: true })
+  @Column('jsonb', { nullable: true })
   stakeholderLinks: {
     mentors?: string[];
     employers?: string[];
   };
 
-  @Column({ nullable: true })
+  @Column('text', { nullable: true })
   bio: string;
 
   @Column({ nullable: true })

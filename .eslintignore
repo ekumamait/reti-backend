@@ -1,1 +1,4 @@
+ormconfig.js
+ormconfig.seed.js
 dist/
+node_modules/
