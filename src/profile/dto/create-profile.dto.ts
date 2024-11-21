@@ -43,6 +43,7 @@ export class CreateProfileDto {
   @IsString()
   phoneNumber?: string;
 
+  @ApiProperty({ required: false, type: Date })
   @IsDate()
   @Type(() => Date)
   @IsNotEmpty()
@@ -55,4 +56,5 @@ export class CreateProfileDto {
   @IsInt()
   @IsNotEmpty()
   age: number;
+
 }
