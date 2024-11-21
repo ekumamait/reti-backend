@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Profile } from '../db/entities/profile.entity';
+import { Profile } from '../database/entities/profile.entity';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { User } from '../db/entities/user.entity';
+import { User } from '../database/entities/user.entity';
+import { ERROR_MESSAGES } from '../common/constants';
 
 @Injectable()
 export class ProfileService {
@@ -21,7 +22,7 @@ export class ProfileService {
   ): Promise<Profile> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+      throw new NotFoundException(ERROR_MESSAGES.USER_ID_NOT_FOUND(userId));
     }
 
     const profile = this.profileRepository.create({
@@ -38,19 +39,6 @@ export class ProfileService {
     });
   }
 
-  async findOne(id: number): Promise<Profile> {
-    const profile = await this.profileRepository.findOne({
-      where: { id },
-      relations: ['user'],
-    });
-
-    if (!profile) {
-      throw new NotFoundException(`Profile with ID ${id} not found`);
-    }
-
-    return profile;
-  }
-
   async findByUserId(userId: number): Promise<Profile> {
     const profile = await this.profileRepository.findOne({
       where: { user: { id: userId } },
@@ -58,9 +46,7 @@ export class ProfileService {
     });
 
     if (!profile) {
-      throw new NotFoundException(
-        `Profile for user with ID ${userId} not found`,
-      );
+      throw new NotFoundException(ERROR_MESSAGES.PROFILE_NOT_FOUND(userId));
     }
 
     return profile;
@@ -70,15 +56,15 @@ export class ProfileService {
     id: number,
     updateProfileDto: UpdateProfileDto,
   ): Promise<Profile> {
-    const profile = await this.findOne(id);
+    const profile = await this.findByUserId(id);
 
     Object.assign(profile, updateProfileDto);
 
     return this.profileRepository.save(profile);
   }
 
-  async remove(id: number): Promise<void> {
-    const profile = await this.findOne(id);
+  async delete(id: number): Promise<void> {
+    const profile = await this.findByUserId(id);
     await this.profileRepository.remove(profile);
   }
 

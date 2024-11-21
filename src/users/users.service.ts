@@ -6,11 +6,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../db/entities/user.entity';
+import { User } from '../database/entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UserDto } from './dto/user.dto';
+import { ERROR_MESSAGES } from '../common/constants';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +24,7 @@ export class UsersService {
     if (role) {
       const rolesArray = await this.userRepository.find({ where: { role } });
       if (rolesArray.length === 0)
-        throw new NotFoundException(`Users with role ${role} not found`);
+        throw new NotFoundException(ERROR_MESSAGES.USER_ROLE_FOUND(role));
       return rolesArray;
     }
     return this.userRepository.find();
@@ -32,13 +33,13 @@ export class UsersService {
   async findOneByEmail(email: string): Promise<any> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user)
-      throw new NotFoundException(`User with email ${email} not found`);
+      throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND(email));
     return user;
   }
 
   async findOne(id: number): Promise<UserDto> {
     const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) throw new NotFoundException(`User with id ${id} not found`);
+    if (!user) throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     return user;
   }
 
@@ -49,9 +50,7 @@ export class UsersService {
       },
     });
     if (existingUser) {
-      throw new ConflictException(
-        `User with email ${createUserDto.email}, already exists`,
-      );
+      throw new ConflictException(ERROR_MESSAGES.USER_ALREADY_EXISTS(createUserDto.email),);
     }
 
     const existingUserByName = await this.userRepository.findOne({

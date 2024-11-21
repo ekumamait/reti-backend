@@ -36,12 +36,7 @@ export class ProfileController {
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<any> {
-    return this.profileService.findOne(+id);
-  }
-
-  @Get('user/:userId')
-  findByUserId(@Param('userId') userId: string): Promise<any> {
-    return this.profileService.findByUserId(+userId);
+    return this.profileService.findByUserId(+id);
   }
 
   @Patch(':id')
@@ -53,7 +48,7 @@ export class ProfileController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<any> {
-    return this.profileService.remove(+id);
+  delete(@Param('id') id: string): Promise<any> {
+    return this.profileService.delete(+id);
   }
 }
