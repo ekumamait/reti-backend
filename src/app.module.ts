@@ -15,12 +15,12 @@ import { ProfileModule } from './profile/profile.module';
         password: process.env.DATABASE_PASSWORD,
         database: process.env.DATABASE_NAME,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: false,
+        synchronize: true,
       }),
     }),
     UsersModule,
     AuthModule,
-    ProfileModule
+    ProfileModule,
   ],
 })
 export class AppModule {}
