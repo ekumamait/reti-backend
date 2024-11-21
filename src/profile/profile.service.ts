@@ -5,7 +5,8 @@ import { Profile } from '../database/entities/profile.entity';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { User } from '../database/entities/user.entity';
-import { ERROR_MESSAGES } from '../common/constants';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../common/constants';
+import { returnResponse, ApiResponse } from '../common/response.util';
 
 @Injectable()
 export class ProfileService {
@@ -19,53 +20,61 @@ export class ProfileService {
   async create(
     userId: number,
     createProfileDto: CreateProfileDto,
-  ): Promise<Profile> {
+  ): Promise<ApiResponse<Profile>> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException(ERROR_MESSAGES.USER_ID_NOT_FOUND(userId));
     }
-
     const profile = this.profileRepository.create({
       ...createProfileDto,
       user,
     });
-
-    return this.profileRepository.save(profile);
+    const savedProfile = await this.profileRepository.save(profile);
+    return returnResponse(201, SUCCESS_MESSAGES.PROFILE_CREATED, savedProfile);
   }
 
-  async findAll(): Promise<Profile[]> {
-    return this.profileRepository.find({
+  async findAll(): Promise<ApiResponse<Profile[]>> {
+    const profiles = this.profileRepository.find({
       relations: ['user'],
     });
+    return returnResponse(200, SUCCESS_MESSAGES.PROFILES_FOUND, await profiles);
   }
 
-  async findByUserId(userId: number): Promise<Profile> {
+  async findOne(id: number): Promise<Profile> {
+    const profile = await this.profileRepository.findOne({ where: { id } });
+    if (!profile) throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
+    return profile;
+  }
+
+  async findByUserId(userId: number): Promise<ApiResponse<Profile>> {
     const profile = await this.profileRepository.findOne({
       where: { user: { id: userId } },
       relations: ['user'],
     });
-
     if (!profile) {
       throw new NotFoundException(ERROR_MESSAGES.PROFILE_NOT_FOUND(userId));
     }
-
-    return profile;
+    return returnResponse(200, SUCCESS_MESSAGES.PROFILE_FOUND(userId), profile);
   }
 
   async update(
     id: number,
     updateProfileDto: UpdateProfileDto,
-  ): Promise<Profile> {
-    const profile = await this.findByUserId(id);
-
+  ): Promise<ApiResponse<Profile>> {
+    const profile = await this.findOne(id);
     Object.assign(profile, updateProfileDto);
-
-    return this.profileRepository.save(profile);
+    const updatedProfile = await this.profileRepository.save(profile);
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.PROFILE_UPDATED,
+      updatedProfile,
+    );
   }
 
-  async delete(id: number): Promise<void> {
-    const profile = await this.findByUserId(id);
+  async delete(id: number): Promise<ApiResponse<Profile>> {
+    const profile = await this.findOne(id);
     await this.profileRepository.remove(profile);
+    return returnResponse(204, SUCCESS_MESSAGES.PROFILE_DELETED, profile);
   }
 
   async findBySkills(skills: string[]): Promise<Profile[]> {

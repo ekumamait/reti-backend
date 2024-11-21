@@ -11,6 +11,7 @@ import {
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ApiResponse } from '../common/response.util';
 
 @Controller('profiles')
 export class ProfileController {
@@ -20,12 +21,12 @@ export class ProfileController {
   create(
     @Param('userId') userId: string,
     @Body() createProfileDto: CreateProfileDto,
-  ): Promise<any> {
+  ): Promise<ApiResponse<CreateProfileDto>> {
     return this.profileService.create(+userId, createProfileDto);
   }
 
   @Get()
-  findAll(): Promise<any> {
+  findAll(): Promise<ApiResponse<any[]>> {
     return this.profileService.findAll();
   }
 
@@ -35,7 +36,7 @@ export class ProfileController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<any> {
+  findOne(@Param('id') id: string): Promise<ApiResponse<any>> {
     return this.profileService.findByUserId(+id);
   }
 
@@ -43,12 +44,12 @@ export class ProfileController {
   update(
     @Param('id') id: string,
     @Body() updateProfileDto: UpdateProfileDto,
-  ): Promise<any> {
+  ): Promise<ApiResponse<any>> {
     return this.profileService.update(+id, updateProfileDto);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string): Promise<any> {
+  delete(@Param('id') id: string): Promise<ApiResponse<any>> {
     return this.profileService.delete(+id);
   }
 }

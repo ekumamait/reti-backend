@@ -11,7 +11,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UserDto } from './dto/user.dto';
-import { ERROR_MESSAGES } from '../common/constants';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../common/constants';
+import { returnResponse, ApiResponse } from '../common/response.util';
 
 @Injectable()
 export class UsersService {
@@ -20,21 +21,19 @@ export class UsersService {
     private userRepository: Repository<User>,
   ) {}
 
-  async findAll(role?: 'youth' | 'mentor' | 'employer'): Promise<User[]> {
-    if (role) {
-      const rolesArray = await this.userRepository.find({ where: { role } });
-      if (rolesArray.length === 0)
-        throw new NotFoundException(ERROR_MESSAGES.USER_ROLE_FOUND(role));
-      return rolesArray;
+  async findAll(): Promise<ApiResponse<User[]>> {
+    const users = await this.userRepository.find();
+    if (!users) {
+      throw new NotFoundException(ERROR_MESSAGES.USERS_NOT_FOUND());
     }
-    return this.userRepository.find();
+    return returnResponse(200, SUCCESS_MESSAGES.USERS_FOUND, users);
   }
 
   async findOneByEmail(email: string): Promise<any> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (!user)
       throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND(email));
-    return user;
+    return returnResponse(200, SUCCESS_MESSAGES.USER_EMAIL_FOUND(email), user);
   }
 
   async findOne(id: number): Promise<UserDto> {
@@ -43,12 +42,17 @@ export class UsersService {
     return user;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.userRepository.findOne({
-      where: {
-        email: createUserDto.email,
-      },
-    });
+  async findByUserId(id: number): Promise<ApiResponse<UserDto>> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(SUCCESS_MESSAGES.USER_FOUND(id));
+    }
+    return returnResponse(200, SUCCESS_MESSAGES.USER_CREATED, user);
+  }
+
+  async create(createUserDto: CreateUserDto): Promise<ApiResponse<User>> {
+    const existingUser = await this.findOneByEmail(createUserDto.email);
+
     if (existingUser) {
       throw new ConflictException(ERROR_MESSAGES.USER_ALREADY_EXISTS(createUserDto.email),);
     }
@@ -75,10 +79,15 @@ export class UsersService {
       ...createUserDto,
       password: hashedPassword,
     });
-    return this.userRepository.save(newUser);
+    const savedUser = await this.userRepository.save(newUser);
+    return returnResponse(201, SUCCESS_MESSAGES.USER_CREATED, savedUser);
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDto> {
+
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<ApiResponse<UpdateUserDto>> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -87,7 +96,6 @@ export class UsersService {
     if ('email' in updateUserDto) {
       throw new BadRequestException('Email address cannot be updated');
     }
-
     if (updateUserDto.password) {
       const saltRounds = 10;
       updateUserDto.password = await bcrypt.hash(
@@ -96,12 +104,13 @@ export class UsersService {
       );
     }
     await this.userRepository.update(id, updateUserDto);
-    return this.findOne(id);
+    const updatedUser = await this.findOne(id);
+    return returnResponse(200, SUCCESS_MESSAGES.USER_UPDATED, updatedUser);
   }
 
-  async delete(id: number): Promise<UserDto> {
+  async delete(id: number): Promise<ApiResponse<UserDto>> {
     const removedUser = await this.findOne(id);
     await this.userRepository.delete(id);
-    return removedUser;
+    return returnResponse(204, SUCCESS_MESSAGES.USER_DELETED, removedUser);
   }
 }
