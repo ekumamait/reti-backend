@@ -17,20 +17,8 @@ export class User {
   @Column()
   lastName: string;
 
-  @Column()
-  dateOfBirth: Date;
-
-  @Column()
-  gender: string;
-
   @Column({ unique: true })
   email: string;
-
-  @Column()
-  phoneNumber: string;
-
-  @Column()
-  age: number;
 
   @Column({ default: 'youth' })
   role: 'youth' | 'mentor' | 'employer';
@@ -40,7 +28,4 @@ export class User {
 
   @CreateDateColumn()
   createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }
