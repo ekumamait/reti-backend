@@ -2,8 +2,10 @@ import { Controller, Post, Body, UseGuards, Delete } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('auth')
+@ApiTags('v1/auth')
+@Controller({ path: 'auth', version: '1' })
 export class AuthController {
   constructor(private authService: AuthService) {}
 
