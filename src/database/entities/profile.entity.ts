@@ -24,16 +24,16 @@ export class Profile {
   @Column({ nullable: true })
   profileImage: string;
 
-  @Column('simple-array', { nullable: true })
+  @Column('text', { array: true, nullable: true, default: [] })
   skills: string[];
 
-  @Column('simple-json', { nullable: true })
+  @Column('jsonb', { nullable: true })
   stakeholderLinks: {
     mentors?: string[];
     employers?: string[];
   };
 
-  @Column({ nullable: true })
+  @Column('text', { nullable: true })
   bio: string;
 
   @Column({ nullable: true })
@@ -42,11 +42,23 @@ export class Profile {
   @Column({ nullable: true, unique: true })
   phoneNumber: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'date', nullable: true })
   dateOfBirth: Date;
 
-  @Column({ nullable: true })
-  age: number;
+  get age(): number {
+    if (!this.dateOfBirth) return null;
+    const today = new Date();
+    const birthDate = new Date(this.dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  }
 
   @Column({ nullable: true })
   gender: string;

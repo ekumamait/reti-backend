@@ -8,36 +8,42 @@ import {
   IsNotEmpty,
   IsInt,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { StakeholderLinksDto } from './profile.dto';
 
 export class CreateProfileDto {
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   profileImage?: string;
 
+  @ApiProperty({ type: [String], required: false })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   skills?: string[];
 
+  @ApiProperty({ type: StakeholderLinksDto, required: false })
   @IsOptional()
   @IsObject()
-  stakeholderLinks?: {
-    mentors?: string[];
-    employers?: string[];
-  };
+  stakeholderLinks?: StakeholderLinksDto;
 
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   bio?: string;
 
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   location?: string;
 
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   phoneNumber?: string;
 
+  @ApiProperty({ required: false, type: Date })
   @IsDate()
   @Type(() => Date)
   @IsNotEmpty()
@@ -50,4 +56,5 @@ export class CreateProfileDto {
   @IsInt()
   @IsNotEmpty()
   age: number;
+
 }
