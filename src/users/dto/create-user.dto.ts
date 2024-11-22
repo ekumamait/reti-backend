@@ -7,7 +7,6 @@ import {
   IsInt,
   MinLength,
 } from 'class-validator';
-import { Type } from 'class-transformer';
 
 export class CreateUserDto {
   @IsString()
@@ -18,26 +17,9 @@ export class CreateUserDto {
   @IsNotEmpty()
   lastName: string;
 
-  @IsDate()
-  @Type(() => Date)
-  @IsNotEmpty()
-  dateOfBirth: Date;
-
-  @IsString()
-  @IsNotEmpty()
-  gender: string;
-
   @IsEmail()
   @IsNotEmpty()
   email: string;
-
-  @IsString()
-  @IsNotEmpty()
-  phoneNumber: string;
-
-  @IsInt()
-  @IsNotEmpty()
-  age: number;
 
   @IsEnum(['youth', 'mentor', 'employer'], { message: 'Valid role required' })
   @IsNotEmpty()

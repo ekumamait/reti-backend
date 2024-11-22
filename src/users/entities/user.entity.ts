@@ -3,7 +3,6 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -11,17 +10,17 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   firstName: string;
 
-  @Column()
+  @Column({ unique: true })
   lastName: string;
 
   @Column({ unique: true })
   email: string;
 
-  @Column({ default: 'youth' })
-  role: 'youth' | 'mentor' | 'employer';
+  @Column()
+  role: string;
 
   @Column()
   password: string;

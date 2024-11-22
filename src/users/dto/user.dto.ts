@@ -18,26 +18,14 @@ export class UserDto {
   @IsNotEmpty()
   lastName: string;
 
-  @IsDate()
-  @Type(() => Date)
-  @IsNotEmpty()
-  dateOfBirth: Date;
-
-  @IsString()
-  @IsNotEmpty()
-  gender: string;
-
   @IsEmail()
   @IsNotEmpty()
   email: string;
 
   @IsString()
+  @MinLength(8)
   @IsNotEmpty()
-  phoneNumber: string;
-
-  @IsInt()
-  @IsNotEmpty()
-  age: number;
+  password: string;
 
   @IsEnum(['youth', 'mentor', 'employer'], { message: 'Valid role required' })
   @IsNotEmpty()

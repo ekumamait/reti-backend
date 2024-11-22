@@ -39,8 +39,17 @@ export class Profile {
   @Column({ nullable: true })
   location: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   phoneNumber: string;
+
+  @Column({ nullable: true })
+  dateOfBirth: Date;
+
+  @Column({ nullable: true })
+  age: number;
+
+  @Column({ nullable: true })
+  gender: string;
 
   @CreateDateColumn()
   createdAt: Date;

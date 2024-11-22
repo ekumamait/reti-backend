@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -43,12 +44,26 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
+      where: {
+        email: createUserDto.email,
+      },
     });
-
     if (existingUser) {
       throw new ConflictException(
-        `User with email ${createUserDto.email} already exists`,
+        `User with email ${createUserDto.email}, already exists`,
+      );
+    }
+
+    const existingUserByName = await this.userRepository.findOne({
+      where: {
+        firstName: createUserDto.firstName,
+        lastName: createUserDto.lastName,
+      },
+    });
+    if (existingUserByName) {
+      throw new ConflictException(
+        `User with first name ${createUserDto.firstName} 
+        and last name ${createUserDto.lastName} already exists`,
       );
     }
 
@@ -64,10 +79,16 @@ export class UsersService {
     return this.userRepository.save(newUser);
   }
 
-  async update(
-    id: number,
-    updateUserDto: UpdateUserDto,
-  ): Promise<UpdateUserDto> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDto> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    if ('email' in updateUserDto) {
+      throw new BadRequestException('Email address cannot be updated');
+    }
+
     if (updateUserDto.password) {
       const saltRounds = 10;
       updateUserDto.password = await bcrypt.hash(

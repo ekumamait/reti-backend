@@ -1,4 +1,13 @@
-import { IsString, IsOptional, IsArray, IsObject } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsObject,
+  IsDate,
+  IsNotEmpty,
+  IsInt,
+} from 'class-validator';
 
 export class CreateProfileDto {
   @IsOptional()
@@ -28,4 +37,17 @@ export class CreateProfileDto {
   @IsOptional()
   @IsString()
   phoneNumber?: string;
+
+  @IsDate()
+  @Type(() => Date)
+  @IsNotEmpty()
+  dateOfBirth: Date;
+
+  @IsString()
+  @IsNotEmpty()
+  gender: string;
+
+  @IsInt()
+  @IsNotEmpty()
+  age: number;
 }
