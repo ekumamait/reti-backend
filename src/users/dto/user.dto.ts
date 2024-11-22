@@ -8,6 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { USER_ROLES } from '../../common/constants';
 
 export class UserDto {
   @IsString()
@@ -27,7 +28,9 @@ export class UserDto {
   @IsNotEmpty()
   password: string;
 
-  @IsEnum(['youth', 'mentor', 'employer'], { message: 'Valid role required' })
+  @IsEnum([USER_ROLES.YOUTH, USER_ROLES.MENTOR, USER_ROLES.EMPLOYER], {
+    message: 'Valid role required',
+  })
   @IsNotEmpty()
   role: 'youth' | 'mentor' | 'employer' = 'youth';
 }

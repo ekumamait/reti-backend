@@ -7,6 +7,7 @@ import {
   IsInt,
   MinLength,
 } from 'class-validator';
+import { USER_ROLES } from '../../common/constants';
 
 export class CreateUserDto {
   @IsString()
@@ -21,7 +22,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   email: string;
 
-  @IsEnum(['youth', 'mentor', 'employer'], { message: 'Valid role required' })
+  @IsEnum([USER_ROLES.YOUTH, USER_ROLES.EMPLOYER, USER_ROLES.MENTOR], { message: 'Valid role required' })
   @IsNotEmpty()
   role: 'youth' | 'mentor' | 'employer' = 'youth';
 
