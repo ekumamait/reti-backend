@@ -8,7 +8,7 @@ const dataSource = new DataSource({
   username: process.env.DATABASE_USERNAME || 'postgres',
   password: process.env.DATABASE_PASSWORD || 'password123',
   database: process.env.DATABASE_NAME || 'reti_backend',
-  synchronize: false,
+  synchronize: true,
   logging: true,
   entities: [__dirname + '/dist/**/*.entity.js'],
   migrations: [__dirname + '/dist/db/migrations/*.js'],
