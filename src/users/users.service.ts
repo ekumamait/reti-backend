@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -82,6 +83,10 @@ export class UsersService {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    if ('email' in updateUserDto) {
+      throw new BadRequestException('Email address cannot be updated');
     }
 
     if (updateUserDto.password) {
