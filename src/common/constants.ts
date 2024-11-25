@@ -12,6 +12,11 @@ export const ERROR_MESSAGES = {
   USER_ROLE_FOUND: (role: string) => `User with role ${role} not found`,
   USER_ID_NOT_FOUND: (userId: number) => `User with id ${userId} not found`,
   USERS_NOT_FOUND: () => `There are currently no users`,
+
+  CONVERSATION_NOT_FOUND: (id: number) =>
+    `Conversation with ID ${id} not found`,
+  MESSAGE_NOT_FOUND: (id: number) => `Message with ID ${id} not found`,
+  PARTICIPANTS_NOT_FOUND: () => `One or more participants not found`,
 };
 
 export const SUCCESS_MESSAGES = {
@@ -28,6 +33,12 @@ export const SUCCESS_MESSAGES = {
   USERS_FOUND: 'Users fetched successfully',
   PROFILES_FOUND: 'Profiles fetched successfully',
   NOTIFICATION_CREATED: 'Notification successfully created',
+
+  CONVERSATION_CREATED: 'Conversation successfully created',
+  MESSAGE_SENT: 'Message successfully sent',
+  CONVERSATION_FOUND: (id: number) =>
+    `Conversation with ID ${id} fetched successfully`,
+  MESSAGES_FOUND: 'Messages fetched successfully',
 };
 
 // Add more constants as needed

@@ -4,6 +4,8 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './authentication/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { MessagesModule } from './messages/messages.module';
+import { ConversationsModule } from './conversations/conversations.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { NotificationsModule } from './notifications/notifications.module';
     AuthModule,
     ProfileModule,
     NotificationsModule,
+    MessagesModule,
+    ConversationsModule,
   ],
 })
 export class AppModule {}
