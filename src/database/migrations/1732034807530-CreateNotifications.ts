@@ -5,7 +5,9 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class CreateNotifications1732526000000 implements MigrationInterface {
+export class CreateNotifications1732034807530 implements MigrationInterface {
+  name = 'CreateNotifications1732034807530';
+
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({

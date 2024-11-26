@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class Notifications1732525536854 implements MigrationInterface {
-  name = 'Notifications1732525536854';
+export class CreateProfile1732034807528 implements MigrationInterface {
+  name = 'CreateProfile1732034807528';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -22,9 +22,6 @@ export class Notifications1732525536854 implements MigrationInterface {
       `ALTER TABLE "user" ADD CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email")`,
     );
     await queryRunner.query(
-      `ALTER TABLE "user" ADD CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email")`,
-    );
-    await queryRunner.query(
       `ALTER TABLE "user" ALTER COLUMN "role" SET DEFAULT 'youth'`,
     );
     await queryRunner.query(
@@ -38,9 +35,6 @@ export class Notifications1732525536854 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE "user" ALTER COLUMN "role" DROP DEFAULT`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "user" DROP CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22"`,
     );
     await queryRunner.query(
       `ALTER TABLE "user" DROP CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22"`,

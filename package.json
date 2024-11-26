@@ -23,8 +23,7 @@
     "migration:down": "typeorm migration:revert -d ormconfig.js",
     "seed:config": "ts-node ./node_modules/typeorm-seeding/dist/cli.js config",
     "seed:run": "ts-node ./node_modules/typeorm-seeding/dist/cli.js seed -n ormconfig.seed.js",
-    "prepare": "husky install",
-    "migrations:run": "ts-node run-migrations.ts"
+    "prepare": "husky install"
   },
   "dependencies": {
     "@faker-js/faker": "^9.2.0",

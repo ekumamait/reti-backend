@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Notification } from './entities/notification.entity';
+import { Notification } from '../database/entities/notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 
 @Injectable()
@@ -38,12 +38,12 @@ export class NotificationsService {
     return this.notificationsRepository.save(notification);
   }
 
-  async remove(id: number, userId: number) {
+  async delete(id: number, userId: number) {
     const notification = await this.findOne(id, userId);
     return this.notificationsRepository.remove(notification);
   }
 
-  async removeAll(userId: number) {
+  async deleteAll(userId: number) {
     const notifications = await this.findAll(userId);
     return this.notificationsRepository.remove(notifications);
   }

@@ -12,6 +12,7 @@ import {
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Notification } from '../database/entities/notification.entity';
 
 @Controller('notifications')
 @UseGuards(AuthGuard('jwt'))
@@ -42,12 +43,12 @@ export class NotificationsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Request() req) {
-    return this.notificationsService.remove(+id, req.user.id);
+  delete(@Param('id') id: string, @Request() req) {
+    return this.notificationsService.delete(+id, req.user.id);
   }
 
   @Delete()
-  removeAll(@Request() req) {
-    return this.notificationsService.removeAll(req.user.id);
+  deleteAll(@Request() req) {
+    return this.notificationsService.deleteAll(req.user.id);
   }
 }
