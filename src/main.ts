@@ -9,8 +9,13 @@ config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Enable validation pipes
-  app.useGlobalPipes(new ValidationPipe());
+  // Enable validation pipes with transformation
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
 
   // Swagger configuration
   const config = new DocumentBuilder()
