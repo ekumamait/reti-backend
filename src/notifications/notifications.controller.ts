@@ -13,6 +13,7 @@ import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse } from 'src/common/response.util';
 
 @ApiTags('v1/notifications')
 @Controller({ path: 'notifications', version: '1' })
@@ -21,10 +22,10 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Post()
-  create(@Body() createNotificationDto: CreateNotificationDto, @Request() req) {
-    return this.notificationsService.create({
-      ...createNotificationDto,
-    });
+  create(
+    @Body() createNotificationDto: CreateNotificationDto,
+  ): Promise<ApiResponse<CreateNotificationDto>> {
+    return this.notificationsService.create(createNotificationDto);
   }
 
   @Get()

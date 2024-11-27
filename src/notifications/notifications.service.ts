@@ -3,20 +3,42 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from '../database/entities/notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
+import { ApiResponse, returnResponse } from 'src/common/response.util';
+import { User } from 'src/database/entities/user.entity';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from 'src/common/constants';
 
 @Injectable()
 export class NotificationsService {
   constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     @InjectRepository(Notification)
     private notificationsRepository: Repository<Notification>,
   ) {}
 
-  create(createNotificationDto: CreateNotificationDto) {
+  async create(
+    createNotificationDto: CreateNotificationDto,
+  ): Promise<ApiResponse<Notification>> {
+    const user = await this.userRepository.findOne({
+      where: { id: createNotificationDto.userId },
+    });
+    if (!user) {
+      throw new NotFoundException(
+        ERROR_MESSAGES.USER_ID_NOT_FOUND(createNotificationDto.userId),
+      );
+    }
     const notification = this.notificationsRepository.create(
       createNotificationDto,
     );
 
-    return this.notificationsRepository.save(notification);
+    const savedNotification = await this.notificationsRepository.save(
+      notification,
+    );
+    return returnResponse(
+      201,
+      SUCCESS_MESSAGES.NOTIFICATION_CREATED,
+      savedNotification,
+    );
   }
 
   findAll(userId: number) {

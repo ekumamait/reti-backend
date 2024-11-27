@@ -27,6 +27,7 @@ export const SUCCESS_MESSAGES = {
     `User with Email ${email} fetched successfully`,
   USERS_FOUND: 'Users fetched successfully',
   PROFILES_FOUND: 'Profiles fetched successfully',
+  NOTIFICATION_CREATED: 'Notification successfully created',
 };
 
 // Add more constants as needed
