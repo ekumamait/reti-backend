@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Message } from './entities/message.entity';
-import { Conversation } from '../conversations/entities/conversation.entity';
+import { Message } from '../database/entities/message.entity';
+import { Conversation } from '../database/entities/conversation.entity';
 import { CreateMessageDto } from './dto/create-message.dto';
-import { User } from '../users/entities/user.entity';
+import { User } from '../database/entities/user.entity';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from 'src/common/constants';
+import { ApiResponse, returnResponse } from 'src/common/response.util';
 
 @Injectable()
 export class MessagesService {
@@ -20,8 +21,8 @@ export class MessagesService {
 
   async sendMessage(
     createMessageDto: CreateMessageDto,
-  ): Promise<{ message: Message; successMessage: string }> {
-    const { senderId, receiverId, conversationId, content } = createMessageDto;
+  ): Promise<ApiResponse<Message>> {
+    const { senderId, receiverId, content } = createMessageDto;
 
     const sender = await this.userRepository.findOne({
       where: { id: senderId },
@@ -29,14 +30,30 @@ export class MessagesService {
     const receiver = await this.userRepository.findOne({
       where: { id: receiverId },
     });
-    const conversation = await this.conversationRepository.findOne({
-      where: { id: conversationId },
-    });
 
-    if (!sender || !receiver || !conversation) {
+    if (!sender || !receiver) {
       throw new NotFoundException(ERROR_MESSAGES.PARTICIPANTS_NOT_FOUND);
     }
 
+    // Check if a conversation between the users exists
+    let conversation = await this.conversationRepository
+      .createQueryBuilder('conversation')
+      .where(
+        '(conversation.user1id = :senderId AND conversation.user2id = :receiverId) OR (conversation.user1id = :receiverId AND conversation.user2id = :senderId)',
+        { senderId, receiverId },
+      )
+      .getOne();
+
+    // If no conversation exists, create a new one
+    if (!conversation) {
+      conversation = this.conversationRepository.create({
+        user1: sender,
+        user2: receiver,
+      });
+      conversation = await this.conversationRepository.save(conversation);
+    }
+
+    // Create and save the message
     const message = this.messageRepository.create({
       sender,
       receiver,
@@ -45,13 +62,12 @@ export class MessagesService {
     });
 
     const savedMessage = await this.messageRepository.save(message);
-    return {
-      successMessage: SUCCESS_MESSAGES.MESSAGE_SENT,
-      message: savedMessage,
-    };
+    return returnResponse(200, SUCCESS_MESSAGES.MESSAGE_SENT, savedMessage);
   }
 
-  async getConversationMessages(conversationId: number): Promise<Message[]> {
+  async getConversationMessages(
+    conversationId: number,
+  ): Promise<ApiResponse<Message[]>> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
       relations: ['messages', 'messages.sender', 'messages.receiver'],
@@ -63,6 +79,10 @@ export class MessagesService {
       );
     }
 
-    return conversation.messages;
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.MESSAGES_FOUND,
+      conversation.messages,
+    );
   }
 }

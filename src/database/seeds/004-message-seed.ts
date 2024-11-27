@@ -1,8 +1,8 @@
 import { Factory, Seeder } from 'typeorm-seeding';
 import { Connection } from 'typeorm';
-import { Message } from '../../messages/entities/message.entity';
+import { Message } from '../entities/message.entity';
 import { User } from '../entities/user.entity';
-import { Conversation } from '../../conversations/entities/conversation.entity';
+import { Conversation } from '../entities/conversation.entity';
 
 export default class CreateMessages implements Seeder {
   public async run(factory: Factory, connection: Connection): Promise<void> {

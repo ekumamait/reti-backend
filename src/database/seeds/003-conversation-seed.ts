@@ -1,7 +1,7 @@
 import { Factory, Seeder } from 'typeorm-seeding';
 import { Connection, In } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { Conversation } from '../../conversations/entities/conversation.entity';
+import { Conversation } from '../entities/conversation.entity';
 import { NotFoundException } from '@nestjs/common';
 import { ERROR_MESSAGES } from 'src/common/constants';
 
@@ -11,21 +11,21 @@ export default class CreateConversations implements Seeder {
     const conversationRepository = connection.getRepository(Conversation);
 
     const conversationsData = [
-      { participantIds: [1, 2] },
-      { participantIds: [1, 3] },
+      { user1id: 1, user2id: 2 },
+      { user1id: 1, user2id: 3 },
     ];
 
-    for (const { participantIds } of conversationsData) {
-      const participants = await userRepository.findBy({
-        id: In(participantIds),
-      });
+    for (const { user1id, user2id } of conversationsData) {
+      const user1 = await userRepository.findOne({ where: { id: user1id } });
+      const user2 = await userRepository.findOne({ where: { id: user2id } });
 
-      if (participants.length !== participantIds.length) {
+      if (!user1 || !user2) {
         throw new NotFoundException(ERROR_MESSAGES.PARTICIPANTS_NOT_FOUND);
       }
 
       const conversation = new Conversation();
-      conversation.participants = participants;
+      conversation.user1 = user1;
+      conversation.user2 = user2;
 
       await conversationRepository.save(conversation);
     }

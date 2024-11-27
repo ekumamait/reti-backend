@@ -5,8 +5,8 @@ import {
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { Message } from '../../messages/entities/message.entity';
-import { Conversation } from '../../conversations/entities/conversation.entity';
+import { Message } from './message.entity';
+import { Conversation } from './conversation.entity';
 
 import { Notification } from './notification.entity';
 
@@ -39,8 +39,14 @@ export class User {
   @OneToMany(() => Message, (message) => message.receiver)
   receivedMessages: Message[];
 
-  @ManyToMany(() => Conversation, (conversation) => conversation.participants)
-  conversations: Conversation[];
+  // @ManyToMany(() => Conversation, (conversation) => conversation.participants)
+  // conversations: Conversation[];
+
+  @OneToMany(() => Conversation, (conversation) => conversation.user1)
+  conversationsAsUser1: Conversation[];
+
+  @OneToMany(() => Conversation, (conversation) => conversation.user2)
+  conversationsAsUser2: Conversation[];
 
   @CreateDateColumn()
   createdAt: Date;
