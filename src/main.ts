@@ -35,9 +35,9 @@ async function bootstrap() {
   });
 
   // Handle 405 errors
-  app.use((_req, res, _next) => {
-    res.status(405).json({ message: 'This URL does not exist' });
-  });
+  // app.use((_req, res, _next) => {
+  //   res.status(405).json({ message: 'This URL does not exist' });
+  // });
 
   // Handle server errors
   app.use((err, _req, res, _next) => {

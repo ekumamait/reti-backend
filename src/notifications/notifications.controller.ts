@@ -12,9 +12,10 @@ import {
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Notification } from '../database/entities/notification.entity';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('notifications')
+@ApiTags('v1/notifications')
+@Controller({ path: 'notifications', version: '1' })
 @UseGuards(AuthGuard('jwt'))
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
@@ -23,7 +24,6 @@ export class NotificationsController {
   create(@Body() createNotificationDto: CreateNotificationDto, @Request() req) {
     return this.notificationsService.create({
       ...createNotificationDto,
-      userId: req.user.id,
     });
   }
 

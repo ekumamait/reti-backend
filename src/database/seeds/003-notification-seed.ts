@@ -18,8 +18,6 @@ export default class CreateNotifications implements Seeder {
             'Thank you for joining our platform. We hope you have a great experience!',
           isRead: false,
           userId: 1, // For John Doe
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           id: 2,
@@ -27,8 +25,6 @@ export default class CreateNotifications implements Seeder {
           message: 'A new mentor has joined your area of interest.',
           isRead: false,
           userId: 1, // For John Doe
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           id: 3,
@@ -37,8 +33,6 @@ export default class CreateNotifications implements Seeder {
             'Please update your profile to help us match you with opportunities.',
           isRead: true,
           userId: 2, // For Jane Smith
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           id: 4,
@@ -46,8 +40,6 @@ export default class CreateNotifications implements Seeder {
           message: 'A new job matching your skills has been posted.',
           isRead: false,
           userId: 4, // For Bob Brown
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
       ];
 

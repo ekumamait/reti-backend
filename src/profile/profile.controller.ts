@@ -15,6 +15,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ApiResponse } from '../common/response.util';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('v1/profiles')
 @Controller({ path: 'profiles', version: '1' })

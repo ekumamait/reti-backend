@@ -1,14 +1,14 @@
 const { DataSource } = require('typeorm');
 require('dotenv').config();
 
-const config = {
+const dataSource = new DataSource({
   type: 'postgres',
   host: process.env.DATABASE_HOST,
   port: parseInt(process.env.DATABASE_PORT),
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  synchronize: false,
+  synchronize: true,
   logging: false,
   entities: [__dirname + '/dist/**/*.entity.js'],
   migrations: [__dirname + '/dist/database/migrations/*.js'],
@@ -17,8 +17,6 @@ const config = {
   extra: {
     trustServerCertificate: true,
   },
-};
+});
 
-const dataSource = new DataSource(config);
 module.exports = dataSource;
-module.exports.config = () => config;
