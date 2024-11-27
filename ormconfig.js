@@ -11,9 +11,9 @@ const dataSource = new DataSource({
   synchronize: false,
   logging: false,
   entities: [__dirname + '/dist/**/*.entity.js'],
-  migrations: [__dirname + '/dist/db/migrations/*.js'],
-  seeds: [__dirname + '/dist/db/seeds/*.js'],
-  factories: [__dirname + '/dist/db/factories/*.js'],
+  migrations: [__dirname + '/dist/database/migrations/*.js'],
+  seeds: [__dirname + '/dist/database/seeds/*.js'],
+  factories: [__dirname + '/dist/database/factories/*.js'],
   extra: {
     trustServerCertificate: true,
   },
