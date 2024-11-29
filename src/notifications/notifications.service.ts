@@ -41,33 +41,71 @@ export class NotificationsService {
     );
   }
 
-  findAll(userId: number) {
-    return this.notificationsRepository.find({ where: { userId } });
+  async findAll(userId: number): Promise<ApiResponse<Notification[]>> {
+    const notifications = await this.notificationsRepository.find({
+      where: { userId },
+    });
+    return returnResponse(
+      200,
+      'Notifications fetched successfully',
+      notifications,
+    );
   }
 
-  async findOne(id: number, userId: number) {
+  async findOne(
+    id: number,
+    userId: number,
+  ): Promise<ApiResponse<Notification>> {
     const notification = await this.notificationsRepository.findOne({
       where: { id, userId },
     });
     if (!notification) {
       throw new NotFoundException(`Notification #${id} not found`);
     }
-    return notification;
+    return returnResponse(
+      200,
+      `Notification #${id} fetched successfully`,
+      notification,
+    );
   }
 
-  async markAsRead(id: number, userId: number) {
+  async markAsRead(
+    id: number,
+    userId: number,
+  ): Promise<ApiResponse<Notification>> {
     const notification = await this.findOne(id, userId);
-    notification.isRead = true;
-    return this.notificationsRepository.save(notification);
+    const updatedNotification = await this.notificationsRepository.save({
+      ...notification.data,
+      isRead: true,
+    });
+    return returnResponse(
+      200,
+      `Notification #${id} marked as read`,
+      updatedNotification,
+    );
   }
 
-  async delete(id: number, userId: number) {
+  async delete(id: number, userId: number): Promise<ApiResponse<Notification>> {
     const notification = await this.findOne(id, userId);
-    return this.notificationsRepository.remove(notification);
+    const deletedNotification = await this.notificationsRepository.remove(
+      notification.data,
+    );
+    return returnResponse(
+      200,
+      `Notification #${id} deleted successfully`,
+      deletedNotification,
+    );
   }
 
-  async deleteAll(userId: number) {
+  async deleteAll(userId: number): Promise<ApiResponse<Notification[]>> {
     const notifications = await this.findAll(userId);
-    return this.notificationsRepository.remove(notifications);
+    const deletedNotifications = await this.notificationsRepository.remove(
+      notifications.data,
+    );
+    return returnResponse(
+      200,
+      'All notifications deleted successfully',
+      deletedNotifications,
+    );
   }
 }

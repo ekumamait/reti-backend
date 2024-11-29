@@ -14,6 +14,7 @@ import { CreateNotificationDto } from './dto/create-notification.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiResponse } from 'src/common/response.util';
+import { Notification } from '../database/entities/notification.entity';
 
 @ApiTags('v1/notifications')
 @Controller({ path: 'notifications', version: '1' })
@@ -22,34 +23,43 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Post()
-  create(
+  async create(
     @Body() createNotificationDto: CreateNotificationDto,
-  ): Promise<ApiResponse<CreateNotificationDto>> {
+  ): Promise<ApiResponse<Notification>> {
     return this.notificationsService.create(createNotificationDto);
   }
 
   @Get()
-  findAll(@Request() req) {
+  async findAll(@Request() req): Promise<ApiResponse<Notification[]>> {
     return this.notificationsService.findAll(req.user.id);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Request() req) {
+  async findOne(
+    @Param('id') id: string,
+    @Request() req,
+  ): Promise<ApiResponse<Notification>> {
     return this.notificationsService.findOne(+id, req.user.id);
   }
 
   @Patch(':id/read')
-  markAsRead(@Param('id') id: string, @Request() req) {
+  async markAsRead(
+    @Param('id') id: string,
+    @Request() req,
+  ): Promise<ApiResponse<Notification>> {
     return this.notificationsService.markAsRead(+id, req.user.id);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string, @Request() req) {
+  async delete(
+    @Param('id') id: string,
+    @Request() req,
+  ): Promise<ApiResponse<Notification>> {
     return this.notificationsService.delete(+id, req.user.id);
   }
 
   @Delete()
-  deleteAll(@Request() req) {
+  async deleteAll(@Request() req): Promise<ApiResponse<Notification[]>> {
     return this.notificationsService.deleteAll(req.user.id);
   }
 }
