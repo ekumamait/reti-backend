@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Message } from '../database/entities/message.entity';
 import { Conversation } from '../database/entities/conversation.entity';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { User } from '../database/entities/user.entity';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from 'src/common/constants';
 import { ApiResponse, returnResponse } from 'src/common/response.util';
+import { MarkMessagesReadDto } from './dto/MarkMessagesReadDto';
 
 @Injectable()
 export class MessagesService {
@@ -84,5 +85,15 @@ export class MessagesService {
       SUCCESS_MESSAGES.MESSAGES_FOUND,
       conversation.messages,
     );
+  }
+
+  async markMessagesAsRead(
+    markMessagesReadDto: MarkMessagesReadDto,
+  ): Promise<ApiResponse<void>> {
+    const { messageIds } = markMessagesReadDto;
+
+    await this.messageRepository.update({ id: In(messageIds) }, { read: true });
+
+    return returnResponse(200, SUCCESS_MESSAGES.MESSAGES_MARKED_AS_READ);
   }
 }

@@ -39,6 +39,7 @@ export const SUCCESS_MESSAGES = {
   CONVERSATION_FOUND: (id: number) =>
     `Conversation with ID ${id} fetched successfully`,
   MESSAGES_FOUND: 'Messages fetched successfully',
+  MESSAGES_MARKED_AS_READ: 'Messages successfully marked as read',
 };
 
 // Add more constants as needed

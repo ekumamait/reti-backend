@@ -15,10 +15,6 @@ export class Conversation {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // @ManyToMany(() => User)
-  // @JoinTable()
-  // participants: User[];
-
   @ManyToOne(() => User, (user) => user.conversationsAsUser1)
   @JoinColumn({ name: 'user1id' })
   user1: User;
