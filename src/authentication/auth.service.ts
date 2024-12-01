@@ -12,19 +12,24 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<User> {
-    const user = await this.usersService.findOneByEmail(email);
-    if (!user) {
+    const userResponse = await this.usersService.findOneByEmail(email);
+
+    if (!userResponse || !userResponse.data) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const isMatch = await bcrypt.compare(password, user.data.password);
+
+    const user = userResponse.data;
+    const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
     return user;
   }
 
   async login(user: User) {
-    const payload = { email: user.email, password: user.password };
+    const payload = { email: user.email, sub: user.id, role: user.role };
     const token = this.jwtService.sign(payload);
     return {
       access_token: token,
@@ -32,7 +37,8 @@ export class AuthService {
     };
   }
 
-  async logout(userId: string): Promise<void> {
-    console.log(`User with ID ${userId} has logged out.`);
+  async logout(_userId: string): Promise<{ message: string }> {
+    // Logout is handled on client side by removing the token
+    return { message: 'Logged out successfully' };
   }
 }

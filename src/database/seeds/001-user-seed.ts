@@ -1,12 +1,14 @@
 import { Connection } from 'typeorm';
 import { Factory, Seeder } from 'typeorm-seeding';
 import { User } from '../entities/user.entity';
+import * as bcrypt from 'bcrypt';
 
 export default class CreateUsers implements Seeder {
   public async run(factory: Factory, connection: Connection): Promise<void> {
     const existingUsers = await connection.getRepository(User).find();
     // Only seed if no users exist
     if (existingUsers.length === 0) {
+      const hashedPassword = await bcrypt.hash('password123', 10);
       const users: Partial<User>[] = [
         {
           id: 1,
@@ -14,7 +16,7 @@ export default class CreateUsers implements Seeder {
           lastName: 'Doe',
           email: 'john.doe@example.com',
           role: 'youth',
-          password: 'password123', // Use a hashed password in production
+          password: hashedPassword,
         },
         {
           id: 2,
@@ -22,7 +24,7 @@ export default class CreateUsers implements Seeder {
           lastName: 'Smith',
           email: 'jane.smith@example.com',
           role: 'mentor',
-          password: 'password123', // Use a hashed password in production
+          password: hashedPassword,
         },
         {
           id: 3,
@@ -30,7 +32,7 @@ export default class CreateUsers implements Seeder {
           lastName: 'Johnson',
           email: 'alice.johnson@example.com',
           role: 'employer',
-          password: 'password123', // Use a hashed password in production
+          password: hashedPassword,
         },
         {
           id: 4,
@@ -38,9 +40,8 @@ export default class CreateUsers implements Seeder {
           lastName: 'Brown',
           email: 'bob.brown@example.com',
           role: 'youth',
-          password: 'password123', // Use a hashed password in production
+          password: hashedPassword,
         },
-        // Add more user data as needed
       ];
 
       await connection.query(

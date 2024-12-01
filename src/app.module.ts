@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './authentication/auth.module';
 import { ProfileModule } from './profile/profile.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -15,12 +16,13 @@ import { ProfileModule } from './profile/profile.module';
         password: process.env.DATABASE_PASSWORD,
         database: process.env.DATABASE_NAME,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: false,
+        synchronize: true,
       }),
     }),
     UsersModule,
     AuthModule,
     ProfileModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

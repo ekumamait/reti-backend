@@ -5,7 +5,9 @@ import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { LocalStrategy } from './strategy/local.strategy';
+import { JwtStrategy } from './strategy/jwt.strategy';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { config } from 'dotenv';
 
 config();
@@ -19,8 +21,14 @@ config();
       signOptions: { expiresIn: '1h' },
     }),
   ],
-  providers: [AuthService, LocalStrategy, LocalAuthGuard],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    LocalAuthGuard,
+    JwtAuthGuard,
+  ],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [JwtAuthGuard, JwtModule],
 })
 export class AuthModule {}

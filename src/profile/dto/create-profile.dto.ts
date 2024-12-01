@@ -56,5 +56,4 @@ export class CreateProfileDto {
   @IsInt()
   @IsNotEmpty()
   age: number;
-
 }
