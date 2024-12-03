@@ -9,7 +9,7 @@ const dataSource = new DataSource({
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
   synchronize: true,
-  logging: false,
+  logging: true,
   entities: [__dirname + '/dist/**/*.entity.js'],
   migrations: [__dirname + '/dist/database/migrations/*.js'],
   seeds: [__dirname + '/dist/database/seeds/*.js'],

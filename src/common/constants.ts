@@ -36,8 +36,11 @@ export const SUCCESS_MESSAGES = {
 
   CONVERSATION_CREATED: 'Conversation successfully created',
   MESSAGE_SENT: 'Message successfully sent',
+  MESSAGE_UPDATED: 'Message successfully updated',
   CONVERSATION_FOUND: (id: number) =>
     `Conversation with ID ${id} fetched successfully`,
+  CONVERSATION_DELETED: (id: number) =>
+    `Conversation with ID ${id} deleted successfully`,
   MESSAGES_FOUND: 'Messages fetched successfully',
   MESSAGES_MARKED_AS_READ: 'Messages successfully marked as read',
   CONVERSATIONS_FOUND: 'Conversations fetched successfully',

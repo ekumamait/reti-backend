@@ -17,12 +17,74 @@ export class ConversationsService {
     private userRepository: Repository<User>,
   ) {}
 
+  async createConversation(
+    createConversationDto: CreateConversationDto,
+  ): Promise<ApiResponse<Conversation>> {
+    const { messages } = createConversationDto;
+    const userIds = Array.from(
+      new Set(messages.flatMap((msg) => [msg.senderId, msg.receiverId])),
+    );
+
+    const users = await this.userRepository.findBy({ id: In(userIds) });
+    if (users.length !== userIds.length) {
+      throw new NotFoundException('One or more users not found');
+    }
+
+    const userMap = new Map(
+      users.map((user) => [user.id, `${user.firstName} ${user.lastName}`]),
+    );
+
+    const detailedMessages = messages.map((message, index) => ({
+      ...message,
+      id: message.id ?? Date.now() + index,
+      timestamp: message.timestamp ?? new Date(),
+      read: message.read ?? false,
+      sender: userMap.get(message.senderId),
+      receiver: userMap.get(message.receiverId),
+    }));
+
+    const existingConversation = await this.conversationRepository
+      .createQueryBuilder('conversation')
+      .where(
+        'conversation.messages @> :message1 OR conversation.messages @> :message2',
+        {
+          message1: JSON.stringify([
+            { senderId: userIds[0], receiverId: userIds[1] },
+          ]),
+          message2: JSON.stringify([
+            { senderId: userIds[1], receiverId: userIds[0] },
+          ]),
+        },
+      )
+      .getOne();
+    if (existingConversation) {
+      console.log('>>>>', existingConversation.messages);
+      existingConversation.messages.push(...detailedMessages);
+      await this.conversationRepository.save(existingConversation);
+
+      return returnResponse(
+        200,
+        SUCCESS_MESSAGES.MESSAGE_SENT,
+        existingConversation,
+      );
+    }
+    const conversation = this.conversationRepository.create({
+      ...createConversationDto,
+      messages: detailedMessages,
+    });
+    await this.conversationRepository.save(conversation);
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.CONVERSATION_CREATED,
+      conversation,
+    );
+  }
+
   async getConversationMessages(
     conversationId: number,
   ): Promise<ApiResponse<Conversation>> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
-      relations: ['messages', 'messages.sender', 'messages.receiver'],
     });
 
     if (!conversation) {
@@ -40,7 +102,7 @@ export class ConversationsService {
 
   async getUserConversations(
     userId: number,
-  ): Promise<ApiResponse<ConversationDto[]>> {
+  ): Promise<ApiResponse<Conversation[]>> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
@@ -49,36 +111,102 @@ export class ConversationsService {
 
     const conversations = await this.conversationRepository
       .createQueryBuilder('conversation')
-      .leftJoinAndSelect('conversation.user1', 'user1')
-      .leftJoinAndSelect('conversation.user2', 'user2')
-      .where(
-        'conversation.user1id = :userId OR conversation.user2id = :userId',
-        { userId },
-      )
+      .where('conversation.messages @> :message', {
+        message: JSON.stringify([{ senderId: userId }]),
+      })
+      .orWhere('conversation.messages @> :message', {
+        message: JSON.stringify([{ receiverId: userId }]),
+      })
       .getMany();
-
-    const conversationDtos: ConversationDto[] = conversations.map(
-      (conversation) => ({
-        id: conversation.id,
-        user1: {
-          id: conversation.user1.id,
-          firstName: conversation.user1.firstName,
-          lastName: conversation.user1.lastName,
-          email: conversation.user1.email,
-        },
-        user2: {
-          id: conversation.user2.id,
-          firstName: conversation.user2.firstName,
-          lastName: conversation.user2.lastName,
-          email: conversation.user2.email,
-        },
-      }),
-    );
 
     return returnResponse(
       200,
       SUCCESS_MESSAGES.CONVERSATIONS_FOUND,
-      conversationDtos,
+      conversations,
+    );
+  }
+
+  async markMessageAsRead(
+    conversationId: number,
+    messageId: number,
+  ): Promise<ApiResponse<Conversation>> {
+    const conversation = await this.conversationRepository.findOne({
+      where: { id: conversationId },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException(
+        ERROR_MESSAGES.CONVERSATION_NOT_FOUND(conversationId),
+      );
+    }
+
+    const message = conversation.messages.find((msg) => msg.id === messageId);
+    if (!message) {
+      throw new NotFoundException(ERROR_MESSAGES.MESSAGE_NOT_FOUND(messageId));
+    }
+
+    message.read = true;
+
+    conversation.messages = conversation.messages.map((msg) =>
+      msg.id === messageId ? message : msg,
+    );
+
+    await this.conversationRepository.save(conversation);
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.MESSAGES_MARKED_AS_READ,
+      conversation,
+    );
+  }
+
+  async editMessage(
+    conversationId: number,
+    messageId: number,
+    newContent: string,
+  ): Promise<ApiResponse<Conversation>> {
+    const conversation = await this.conversationRepository.findOne({
+      where: { id: conversationId },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException(
+        ERROR_MESSAGES.CONVERSATION_NOT_FOUND(conversationId),
+      );
+    }
+
+    const message = conversation.messages.find((msg) => msg.id === messageId);
+    if (!message) {
+      throw new NotFoundException(ERROR_MESSAGES.MESSAGE_NOT_FOUND(messageId));
+    }
+
+    message.content = newContent;
+
+    conversation.messages = conversation.messages.map((msg) =>
+      msg.id === messageId ? message : msg,
+    );
+
+    await this.conversationRepository.save(conversation);
+    return returnResponse(200, SUCCESS_MESSAGES.MESSAGE_UPDATED, conversation);
+  }
+
+  async deleteConversation(
+    conversationId: number,
+  ): Promise<ApiResponse<Conversation>> {
+    const conversation = await this.conversationRepository.findOne({
+      where: { id: conversationId },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException(
+        ERROR_MESSAGES.CONVERSATION_NOT_FOUND(conversationId),
+      );
+    }
+
+    await this.conversationRepository.delete(conversationId);
+
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.CONVERSATION_DELETED(conversationId),
     );
   }
 }

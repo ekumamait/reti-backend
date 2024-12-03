@@ -1,28 +1,27 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
-  ManyToMany,
-  JoinTable,
-  OneToMany,
-  ManyToOne,
-  JoinColumn,
+  Column,
+  CreateDateColumn,
 } from 'typeorm';
-import { User } from './user.entity';
-import { Message } from './message.entity';
 
 @Entity()
 export class Conversation {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.conversationsAsUser1)
-  @JoinColumn({ name: 'user1id' })
-  user1: User;
+  @Column('jsonb', { nullable: true })
+  messages: {
+    senderId: number;
+    sender: string;
+    receiverId: number;
+    receiver: string;
+    id: number;
+    content: string;
+    timestamp: Date;
+    read: boolean;
+  }[];
 
-  @ManyToOne(() => User, (user) => user.conversationsAsUser2)
-  @JoinColumn({ name: 'user2id' })
-  user2: User;
-
-  @OneToMany(() => Message, (message) => message.conversation)
-  messages: Message[];
+  @CreateDateColumn()
+  createdAt: Date;
 }
