@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { Conversation } from './conversation.entity';
 
 import { Notification } from './notification.entity';
 
@@ -30,6 +31,9 @@ export class User {
 
   @Column()
   password: string;
+
+  @OneToMany(() => Conversation, (conversation) => conversation.messages)
+  conversations: Conversation[];
 
   @CreateDateColumn()
   createdAt: Date;
