@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Profile } from '../database/entities/profile.entity';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ProfileDto } from './dto/profile.dto';
 import { User } from '../database/entities/user.entity';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../common/constants';
 import { returnResponse, ApiResponse } from '../common/response.util';
@@ -20,7 +21,7 @@ export class ProfileService {
   async create(
     userId: number,
     createProfileDto: CreateProfileDto,
-  ): Promise<ApiResponse<Profile>> {
+  ): Promise<ApiResponse<ProfileDto>> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException(ERROR_MESSAGES.USER_ID_NOT_FOUND(userId));
@@ -33,20 +34,20 @@ export class ProfileService {
     return returnResponse(201, SUCCESS_MESSAGES.PROFILE_CREATED, savedProfile);
   }
 
-  async findAll(): Promise<ApiResponse<Profile[]>> {
+  async findAll(): Promise<ApiResponse<ProfileDto[]>> {
     const profiles = this.profileRepository.find({
       relations: ['user'],
     });
     return returnResponse(200, SUCCESS_MESSAGES.PROFILES_FOUND, await profiles);
   }
 
-  async findOne(id: number): Promise<Profile> {
+  async findOne(id: number): Promise<any> {
     const profile = await this.profileRepository.findOne({ where: { id } });
     if (!profile) throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     return profile;
   }
 
-  async findByUserId(userId: number): Promise<ApiResponse<Profile>> {
+  async findByUserId(userId: number): Promise<ApiResponse<ProfileDto>> {
     const profile = await this.profileRepository.findOne({
       where: { user: { id: userId } },
       relations: ['user'],
@@ -60,7 +61,7 @@ export class ProfileService {
   async update(
     id: number,
     updateProfileDto: UpdateProfileDto,
-  ): Promise<ApiResponse<Profile>> {
+  ): Promise<ApiResponse<ProfileDto>> {
     const profile = await this.findOne(id);
     Object.assign(profile, updateProfileDto);
     const updatedProfile = await this.profileRepository.save(profile);
@@ -71,13 +72,13 @@ export class ProfileService {
     );
   }
 
-  async delete(id: number): Promise<ApiResponse<Profile>> {
+  async delete(id: number): Promise<ApiResponse<ProfileDto>> {
     const profile = await this.findOne(id);
     await this.profileRepository.remove(profile);
     return returnResponse(204, SUCCESS_MESSAGES.PROFILE_DELETED, profile);
   }
 
-  async findBySkills(skills: string[]): Promise<Profile[]> {
+  async findBySkills(skills: string[]): Promise<ProfileDto[]> {
     return this.profileRepository
       .createQueryBuilder('profile')
       .where('profile.skills && :skills', { skills })

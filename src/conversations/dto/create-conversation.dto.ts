@@ -10,13 +10,10 @@ import {
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
-class MessageDTO {
+export class MessageDTO {
   @IsInt()
   @IsOptional()
   id?: number;
-
-  @IsInt()
-  senderId: number;
 
   @IsInt()
   receiverId: number;
@@ -26,19 +23,11 @@ class MessageDTO {
 
   @IsOptional()
   @Transform(({ value }) => value ?? new Date())
-  timestamp?: Date;
+  createdAt: Date;
 
   @IsOptional()
   @Transform(({ value }) => value ?? false)
-  read?: boolean;
-
-  @IsOptional()
-  @IsString()
-  sender?: string;
-
-  @IsOptional()
-  @IsString()
-  receiver?: string;
+  isRead?: boolean;
 }
 
 export class CreateConversationDto {

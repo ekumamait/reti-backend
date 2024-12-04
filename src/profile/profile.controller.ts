@@ -14,11 +14,12 @@ import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ApiResponse } from '../common/response.util';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../authentication/guards/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
+import { ProfileDto } from './dto/profile.dto';
 
 @ApiTags('v1/profiles')
 @Controller({ path: 'profiles', version: '1' })
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard('jwt'))
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
@@ -26,12 +27,12 @@ export class ProfileController {
   create(
     @Param('userId') userId: string,
     @Body() createProfileDto: CreateProfileDto,
-  ): Promise<ApiResponse<CreateProfileDto>> {
+  ): Promise<ApiResponse<ProfileDto>> {
     return this.profileService.create(+userId, createProfileDto);
   }
 
   @Get()
-  findAll(): Promise<ApiResponse<any[]>> {
+  findAll(): Promise<ApiResponse<ProfileDto[]>> {
     return this.profileService.findAll();
   }
 
@@ -41,7 +42,7 @@ export class ProfileController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<ApiResponse<any>> {
+  findOne(@Param('id') id: string): Promise<ApiResponse<ProfileDto>> {
     return this.profileService.findByUserId(+id);
   }
 
@@ -54,7 +55,7 @@ export class ProfileController {
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string): Promise<ApiResponse<any>> {
+  delete(@Param('id') id: string): Promise<ApiResponse<ProfileDto>> {
     return this.profileService.delete(+id);
   }
 }

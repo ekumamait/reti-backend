@@ -12,14 +12,11 @@ export class Conversation {
 
   @Column('jsonb', { nullable: true })
   messages: {
-    senderId: number;
-    sender: string;
     receiverId: number;
-    receiver: string;
     id: number;
     content: string;
-    timestamp: Date;
-    read: boolean;
+    createdAt: Date;
+    isRead: boolean;
   }[];
 
   @CreateDateColumn()

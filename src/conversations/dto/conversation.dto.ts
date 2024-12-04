@@ -1,17 +1,25 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty } from 'class-validator';
-import { UserDto } from 'src/users/dto/user.dto';
-
-export type SimpleUserDto = Pick<UserDto, 'firstName' | 'lastName'>;
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsDate,
+  IsInt,
+  IsNotEmpty,
+  ValidateNested,
+} from 'class-validator';
+import { MessageDTO } from './create-conversation.dto';
 
 export class ConversationDto {
   @IsInt()
   @IsNotEmpty()
   id: number;
 
-  @IsNotEmpty()
-  user1: SimpleUserDto;
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => MessageDTO)
+  messages: MessageDTO[];
 
-  @IsNotEmpty()
-  user2: SimpleUserDto;
+  @IsDate()
+  createdAt: Date;
 }

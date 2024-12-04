@@ -6,11 +6,17 @@ import {
   IsDate,
   IsInt,
   MinLength,
+  isInt,
+  isNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { USER_ROLES } from '../../common/constants';
 
 export class UserDto {
+  @IsInt()
+  @IsNotEmpty()
+  id: number;
+
   @IsString()
   @IsNotEmpty()
   firstName: string;

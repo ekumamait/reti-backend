@@ -17,6 +17,8 @@ export const ERROR_MESSAGES = {
     `Conversation with ID ${id} not found`,
   MESSAGE_NOT_FOUND: (id: number) => `Message with ID ${id} not found`,
   PARTICIPANTS_NOT_FOUND: () => `One or more participants not found`,
+  SENDER_RECEIVER_SAME: (userId: number) =>
+    `Sender ${userId} and receiver cannot be same`,
 };
 
 export const SUCCESS_MESSAGES = {

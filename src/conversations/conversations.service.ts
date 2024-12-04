@@ -18,29 +18,30 @@ export class ConversationsService {
   ) {}
 
   async createConversation(
+    userId: number,
     createConversationDto: CreateConversationDto,
-  ): Promise<ApiResponse<Conversation>> {
+  ): Promise<ApiResponse<ConversationDto>> {
     const { messages } = createConversationDto;
-    const userIds = Array.from(
-      new Set(messages.flatMap((msg) => [msg.senderId, msg.receiverId])),
-    );
+    const receiverId = messages[0].receiverId;
 
-    const users = await this.userRepository.findBy({ id: In(userIds) });
-    if (users.length !== userIds.length) {
-      throw new NotFoundException('One or more users not found');
+    const receiver = await this.userRepository.findOne({
+      where: { id: receiverId },
+    });
+    if (!receiver) {
+      throw new NotFoundException('Receiver not found');
     }
+    console.log(userId, receiverId);
 
-    const userMap = new Map(
-      users.map((user) => [user.id, `${user.firstName} ${user.lastName}`]),
-    );
+    if (userId === receiverId) {
+      throw new NotFoundException(ERROR_MESSAGES.SENDER_RECEIVER_SAME(userId));
+    }
 
     const detailedMessages = messages.map((message, index) => ({
       ...message,
+      senderId: userId,
       id: message.id ?? Date.now() + index,
-      timestamp: message.timestamp ?? new Date(),
-      read: message.read ?? false,
-      sender: userMap.get(message.senderId),
-      receiver: userMap.get(message.receiverId),
+      createdAt: message.createdAt ?? new Date(),
+      isRead: message.isRead ?? false,
     }));
 
     const existingConversation = await this.conversationRepository
@@ -48,61 +49,40 @@ export class ConversationsService {
       .where(
         'conversation.messages @> :message1 OR conversation.messages @> :message2',
         {
-          message1: JSON.stringify([
-            { senderId: userIds[0], receiverId: userIds[1] },
-          ]),
-          message2: JSON.stringify([
-            { senderId: userIds[1], receiverId: userIds[0] },
-          ]),
+          message1: JSON.stringify([{ senderId: userId, receiverId }]),
+          message2: JSON.stringify([{ senderId: userId, receiverId }]),
         },
       )
       .getOne();
     if (existingConversation) {
-      console.log('>>>>', existingConversation.messages);
       existingConversation.messages.push(...detailedMessages);
-      await this.conversationRepository.save(existingConversation);
+      const updatedConversation = await this.conversationRepository.save(
+        existingConversation,
+      );
 
       return returnResponse(
         200,
         SUCCESS_MESSAGES.MESSAGE_SENT,
-        existingConversation,
+        updatedConversation,
       );
     }
     const conversation = this.conversationRepository.create({
       ...createConversationDto,
       messages: detailedMessages,
     });
-    await this.conversationRepository.save(conversation);
-    return returnResponse(
-      200,
-      SUCCESS_MESSAGES.CONVERSATION_CREATED,
+    const savedConversation = await this.conversationRepository.save(
       conversation,
     );
-  }
-
-  async getConversationMessages(
-    conversationId: number,
-  ): Promise<ApiResponse<Conversation>> {
-    const conversation = await this.conversationRepository.findOne({
-      where: { id: conversationId },
-    });
-
-    if (!conversation) {
-      throw new NotFoundException(
-        ERROR_MESSAGES.CONVERSATION_NOT_FOUND(conversationId),
-      );
-    }
-
     return returnResponse(
-      200,
-      SUCCESS_MESSAGES.CONVERSATION_FOUND(conversationId),
-      conversation,
+      201,
+      SUCCESS_MESSAGES.CONVERSATION_CREATED,
+      savedConversation,
     );
   }
 
   async getUserConversations(
     userId: number,
-  ): Promise<ApiResponse<Conversation[]>> {
+  ): Promise<ApiResponse<ConversationDto[]>> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
 
     if (!user) {
@@ -129,7 +109,7 @@ export class ConversationsService {
   async markMessageAsRead(
     conversationId: number,
     messageId: number,
-  ): Promise<ApiResponse<Conversation>> {
+  ): Promise<ApiResponse<ConversationDto>> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
     });
@@ -145,7 +125,7 @@ export class ConversationsService {
       throw new NotFoundException(ERROR_MESSAGES.MESSAGE_NOT_FOUND(messageId));
     }
 
-    message.read = true;
+    message.isRead = true;
 
     conversation.messages = conversation.messages.map((msg) =>
       msg.id === messageId ? message : msg,
@@ -163,7 +143,7 @@ export class ConversationsService {
     conversationId: number,
     messageId: number,
     newContent: string,
-  ): Promise<ApiResponse<Conversation>> {
+  ): Promise<ApiResponse<ConversationDto>> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
     });
@@ -191,7 +171,7 @@ export class ConversationsService {
 
   async deleteConversation(
     conversationId: number,
-  ): Promise<ApiResponse<Conversation>> {
+  ): Promise<ApiResponse<ConversationDto>> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
     });

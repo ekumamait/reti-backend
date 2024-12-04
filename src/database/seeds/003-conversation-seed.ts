@@ -15,77 +15,75 @@ export default class CreateConversations implements Seeder {
       {
         messages: [
           {
-            senderId: 1,
             receiverId: 2,
             content: 'Hello, how are you?',
-            timestamp: new Date(),
-            read: false,
+            isRead: false,
+            id: 1,
+            createdAt: new Date(),
           },
           {
-            senderId: 2,
             receiverId: 1,
             content: "I'm doing well, thanks!",
-            timestamp: new Date(),
-            read: false,
+            isRead: false,
+            id: 2,
+            createdAt: new Date(),
           },
         ],
       },
       {
         messages: [
           {
-            senderId: 1,
             receiverId: 3,
             content: 'Hey, are you available for a chat?',
-            timestamp: new Date(),
-            read: false,
+            isRead: false,
+            id: 3,
+            createdAt: new Date(),
           },
           {
-            senderId: 3,
-            receiverId: 1,
+            receiverId: 10,
             content: 'Sure! Let me know when.',
-            timestamp: new Date(),
-            read: false,
+            isRead: false,
+            id: 4,
+            createdAt: new Date(),
           },
         ],
       },
       {
         messages: [
           {
-            senderId: 2,
             receiverId: 3,
             content: 'Did you receive my last message?',
-            timestamp: new Date(),
-            read: false,
+            isRead: false,
+            id: 5,
+            createdAt: new Date(),
           },
         ],
       },
     ];
 
     for (const { messages } of conversationsData) {
-      // Extract unique user IDs from messages
-      const userIds = Array.from(
-        new Set(messages.flatMap((msg) => [msg.senderId, msg.receiverId])),
-      );
+      const userId = 1;
+      const receiverId = messages[0].receiverId;
 
-      // Ensure both users exist
-      const users = await userRepository.findByIds(userIds);
-      if (users.length !== userIds.length) {
-        throw new Error('One or more users not found');
+      const receiver = await userRepository.findOne({
+        where: { id: receiverId },
+      });
+      if (!receiver) {
+        throw new NotFoundException('Receiver not found');
       }
 
-      // Create a map of user IDs to user names
-      const userMap = new Map(
-        users.map((user) => [user.id, `${user.firstName} ${user.lastName}`]),
-      );
+      if (userId === receiverId) {
+        throw new NotFoundException(
+          ERROR_MESSAGES.SENDER_RECEIVER_SAME(userId),
+        );
+      }
 
-      // Enrich messages with unique IDs, timestamps, and user names
       const detailedMessages = messages.map((message, index) => ({
         ...message,
-        id: Date.now() + index, // Generate a unique id
-        timestamp: message.timestamp ?? new Date(),
-        read: message.read ?? false,
-        sender: userMap.get(message.senderId),
-        receiver: userMap.get(message.receiverId),
+        senderId: userId,
+        id: message.id ?? Date.now() + index,
+        createdAt: message.createdAt ?? new Date(),
+        isRead: message.isRead ?? false,
       }));
 
       // Create and save the conversation
