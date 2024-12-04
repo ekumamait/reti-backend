@@ -19,6 +19,10 @@ export const ERROR_MESSAGES = {
   PARTICIPANTS_NOT_FOUND: () => `One or more participants not found`,
   SENDER_RECEIVER_SAME: (userId: number) =>
     `Sender ${userId} and receiver cannot be same`,
+
+  // Product related messages
+  PRODUCT_NOT_FOUND: (id: string) =>
+    `Product with ID ${id} not found or already inactive`,
 };
 
 export const SUCCESS_MESSAGES = {
@@ -46,6 +50,13 @@ export const SUCCESS_MESSAGES = {
   MESSAGES_FOUND: 'Messages fetched successfully',
   MESSAGES_MARKED_AS_READ: 'Messages successfully marked as read',
   CONVERSATIONS_FOUND: 'Conversations fetched successfully',
+
+  // Product related messages
+  PRODUCT_DELETED: (id: string) => `Product with ID ${id} successfully deleted`,
+  PRODUCT_CREATED: 'Product successfully created',
+  PRODUCT_UPDATED: 'Product successfully updated',
+  PRODUCT_FOUND: (id: string) => `Product with ID ${id} fetched successfully`,
+  PRODUCTS_FOUND: 'Products fetched successfully',
 };
 
 // Add more constants as needed

@@ -6,8 +6,8 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Conversation } from './conversation.entity';
-
 import { Notification } from './notification.entity';
+import { Product } from './product.entity';
 
 @Entity()
 export class User {
@@ -28,6 +28,9 @@ export class User {
 
   @OneToMany(() => Notification, (notification) => notification.user)
   notifications: Notification[];
+
+  @OneToMany(() => Product, (product) => product.user)
+  products: Product[];
 
   @Column()
   password: string;

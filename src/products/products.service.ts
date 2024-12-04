@@ -1,83 +1,75 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../database/entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../common/constants';
+import { returnResponse, ApiResponse } from '../common/response.util';
+import { ProductDto } from './dto/product.dto';
 
 @Injectable()
 export class ProductsService {
-  private readonly logger = new Logger(ProductsService.name);
-
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
+  async create(
+    createProductDto: CreateProductDto,
+  ): Promise<ApiResponse<ProductDto>> {
     const product = this.productRepository.create(createProductDto);
-    return await this.productRepository.save(product);
+    const savedProduct = await this.productRepository.save(product);
+    return returnResponse(201, SUCCESS_MESSAGES.PRODUCT_CREATED, savedProduct);
   }
 
-  async findAll(): Promise<Product[]> {
-    return await this.productRepository.find({
+  async findAll(): Promise<ApiResponse<ProductDto[]>> {
+    const products = await this.productRepository.find({
       where: { isActive: true },
       order: { createdAt: 'DESC' },
     });
+    return returnResponse(200, SUCCESS_MESSAGES.PRODUCTS_FOUND, products);
   }
 
-  async findOne(id: string): Promise<Product> {
+  async findOne(id: string): Promise<ApiResponse<ProductDto>> {
     const product = await this.productRepository.findOne({
       where: { id, isActive: true },
     });
     if (!product) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
+      throw new NotFoundException(ERROR_MESSAGES.PRODUCT_NOT_FOUND(id));
     }
-    return product;
+    return returnResponse(200, SUCCESS_MESSAGES.PRODUCT_FOUND(id), product);
   }
 
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
-  ): Promise<Product> {
+  ): Promise<ApiResponse<ProductDto>> {
     const product = await this.findOne(id);
-    Object.assign(product, updateProductDto);
-    return await this.productRepository.save(product);
+    Object.assign(product.data, updateProductDto);
+    const updatedProduct = await this.productRepository.save(product.data);
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.PRODUCT_UPDATED,
+      updatedProduct,
+    );
   }
 
-  async delete(id: string): Promise<void> {
-    this.logger.log('==== DELETE PRODUCT REQUEST ====');
-    this.logger.log(`Attempting to delete product with ID: ${id}`);
-
+  async delete(id: string): Promise<ApiResponse<ProductDto>> {
     const product = await this.productRepository.findOne({
       where: { id, isActive: true },
     });
 
-    this.logger.log(`Product found: ${!!product}`);
-
     if (!product) {
-      this.logger.error(
-        `❌ Product with ID ${id} not found or already inactive`,
-      );
-      throw new NotFoundException(
-        `Product with ID ${id} not found or already inactive`,
-      );
+      throw new NotFoundException(ERROR_MESSAGES.PRODUCT_NOT_FOUND(id));
     }
 
-    try {
-      product.isActive = false;
-      await this.productRepository.save(product);
-      this.logger.log(
-        `✅ Successfully soft deleted product: ${product.name} (${id})`,
-      );
-    } catch (error) {
-      this.logger.error(
-        `❌ Error deleting product: ${error.message}`,
-        error.stack,
-      );
-      throw error;
-    }
-
-    this.logger.log('==== END DELETE REQUEST ====');
+    product.isActive = false;
+    const deletedProduct = await this.productRepository.remove(product);
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.PRODUCT_DELETED(id),
+      deletedProduct,
+    );
   }
 }
