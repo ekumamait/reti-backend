@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../database/entities/product.entity';
@@ -7,6 +11,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../common/constants';
 import { returnResponse, ApiResponse } from '../common/response.util';
 import { ProductDto } from './dto/product.dto';
+import { UserDto } from 'src/users/dto/user.dto';
 
 @Injectable()
 export class ProductsService {
@@ -16,8 +21,12 @@ export class ProductsService {
   ) {}
 
   async create(
+    user: UserDto,
     createProductDto: CreateProductDto,
   ): Promise<ApiResponse<ProductDto>> {
+    if (user.role === 'employer') {
+      throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
+    }
     const product = this.productRepository.create(createProductDto);
     const savedProduct = await this.productRepository.save(product);
     return returnResponse(201, SUCCESS_MESSAGES.PRODUCT_CREATED, savedProduct);
@@ -42,9 +51,13 @@ export class ProductsService {
   }
 
   async update(
+    user: UserDto,
     id: string,
     updateProductDto: UpdateProductDto,
   ): Promise<ApiResponse<ProductDto>> {
+    if (user.role === 'employer') {
+      throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
+    }
     const product = await this.findOne(id);
     Object.assign(product.data, updateProductDto);
     const updatedProduct = await this.productRepository.save(product.data);
@@ -55,7 +68,10 @@ export class ProductsService {
     );
   }
 
-  async delete(id: string): Promise<ApiResponse<ProductDto>> {
+  async delete(user: UserDto, id: string): Promise<ApiResponse<ProductDto>> {
+    if (user.role === 'employer') {
+      throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
+    }
     const product = await this.productRepository.findOne({
       where: { id, isActive: true },
     });
@@ -63,7 +79,6 @@ export class ProductsService {
     if (!product) {
       throw new NotFoundException(ERROR_MESSAGES.PRODUCT_NOT_FOUND(id));
     }
-
     product.isActive = false;
     const deletedProduct = await this.productRepository.remove(product);
     return returnResponse(

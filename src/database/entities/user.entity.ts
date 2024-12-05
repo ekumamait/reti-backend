@@ -8,6 +8,7 @@ import {
 import { Conversation } from './conversation.entity';
 import { Notification } from './notification.entity';
 import { Product } from './product.entity';
+import { Job } from './job.entity';
 
 @Entity()
 export class User {
@@ -37,6 +38,9 @@ export class User {
 
   @OneToMany(() => Conversation, (conversation) => conversation.messages)
   conversations: Conversation[];
+
+  @OneToMany(() => Job, (job) => job.employer)
+  jobs: Job[];
 
   @CreateDateColumn()
   createdAt: Date;

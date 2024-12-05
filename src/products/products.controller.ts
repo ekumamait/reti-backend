@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   ParseUUIDPipe,
+  Request,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -16,6 +17,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiResponse } from 'src/common/response.util';
 import { ProductDto } from './dto/product.dto';
+import { RequestWithUser } from 'src/common/types/types';
 
 @ApiTags('v1/products')
 @Controller({ path: 'products', version: '1' })
@@ -26,8 +28,9 @@ export class ProductsController {
   @Post()
   async create(
     @Body() createProductDto: CreateProductDto,
+    @Request() req: RequestWithUser,
   ): Promise<ApiResponse<ProductDto>> {
-    return this.productsService.create(createProductDto);
+    return this.productsService.create(req.user, createProductDto);
   }
 
   @Get()
@@ -44,12 +47,16 @@ export class ProductsController {
   async update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
+    @Request() req: RequestWithUser,
   ): Promise<ApiResponse<ProductDto>> {
-    return this.productsService.update(id, updateProductDto);
+    return this.productsService.update(req.user, id, updateProductDto);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<ApiResponse<ProductDto>> {
-    return this.productsService.delete(id);
+  async delete(
+    @Param('id') id: string,
+    @Request() req: RequestWithUser,
+  ): Promise<ApiResponse<ProductDto>> {
+    return this.productsService.delete(req.user, id);
   }
 }
