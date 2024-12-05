@@ -34,6 +34,7 @@ export class AuthService {
     return {
       access_token: token,
       expires_in: 3600,
+      user,
     };
   }
 

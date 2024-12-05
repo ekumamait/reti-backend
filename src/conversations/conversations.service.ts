@@ -30,7 +30,6 @@ export class ConversationsService {
     if (!receiver) {
       throw new NotFoundException('Receiver not found');
     }
-    console.log(userId, receiverId);
 
     if (userId === receiverId) {
       throw new NotFoundException(ERROR_MESSAGES.SENDER_RECEIVER_SAME(userId));
