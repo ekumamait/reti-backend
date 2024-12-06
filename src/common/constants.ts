@@ -20,9 +20,10 @@ export const ERROR_MESSAGES = {
   SENDER_RECEIVER_SAME: (userId: number) =>
     `Sender ${userId} and receiver cannot be same`,
 
-  // Product related messages
   PRODUCT_NOT_FOUND: (id: string) =>
     `Product with ID ${id} not found or already inactive`,
+
+  UNAUTHORIZED: 'You are not authorized to perform this action',
 };
 
 export const SUCCESS_MESSAGES = {
@@ -50,13 +51,13 @@ export const SUCCESS_MESSAGES = {
   MESSAGES_FOUND: 'Messages fetched successfully',
   MESSAGES_MARKED_AS_READ: 'Messages successfully marked as read',
   CONVERSATIONS_FOUND: 'Conversations fetched successfully',
-
-  // Product related messages
   PRODUCT_DELETED: (id: string) => `Product with ID ${id} successfully deleted`,
   PRODUCT_CREATED: 'Product successfully created',
   PRODUCT_UPDATED: 'Product successfully updated',
   PRODUCT_FOUND: (id: string) => `Product with ID ${id} fetched successfully`,
   PRODUCTS_FOUND: 'Products fetched successfully',
+  JOB_CREATED: 'Job successfully created',
+  JOBS_FOUND: 'Jobs fetched successfully',
+  JOB_UPDATED: 'Job successfully updated',
+  JOB_DELETED: 'Job successfully deleted',
 };
-
-// Add more constants as needed
