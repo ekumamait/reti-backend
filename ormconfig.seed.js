@@ -9,6 +9,11 @@ module.exports = {
   logging: false,
   entities: [__dirname + '/dist/**/*.entity.js'],
   migrations: [__dirname + '/dist/database/migrations/*.js'],
+  migrationsTableName: 'migrations',
+  migrationsRun: true,
+  cli: {
+    migrationsDir: 'src/database/migrations',
+  },
   seeds: [__dirname + '/dist/database/seeds/*.js'],
   factories: [__dirname + '/dist/database/factories/*.js'],
 };

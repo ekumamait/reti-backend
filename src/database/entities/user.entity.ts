@@ -46,4 +46,7 @@ export class User {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @Column({ nullable: true })
+  profileImage: string;
 }

@@ -1,11 +1,13 @@
-const path = require('path');
 const { DataSource } = require('typeorm');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const path = require('path');
 
-const dataSource = new DataSource({
+dotenv.config();
+
+module.exports = new DataSource({
   type: 'postgres',
   host: process.env.DATABASE_HOST,
-  port: parseInt(process.env.DATABASE_PORT),
+  port: parseInt(process.env.DATABASE_PORT || '5432'),
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
@@ -13,16 +15,6 @@ const dataSource = new DataSource({
     path.join(__dirname, 'src/database/entities/*.{ts,js}'),
     path.join(__dirname, 'src/**/*.entity.{ts,js}'),
   ],
-  synchronize: false,
-  migrationsRun: true,
-  migrations: [path.join(__dirname, 'src/database/migrations/*{.ts,.js}')],
+  migrations: [path.join(__dirname, 'src/database/migrations/*.{ts,js}')],
   migrationsTableName: 'typeorm_migrations',
-  cli: {
-    migrationsDir: 'src/database/migrations',
-  },
-  extra: {
-    trustServerCertificate: true,
-  },
 });
-
-module.exports = dataSource;
