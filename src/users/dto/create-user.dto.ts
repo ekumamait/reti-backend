@@ -6,6 +6,7 @@ import {
   IsDate,
   IsInt,
   MinLength,
+  IsPhoneNumber,
 } from 'class-validator';
 import { USER_ROLES } from '../../common/constants';
 
@@ -18,11 +19,13 @@ export class CreateUserDto {
   @IsNotEmpty()
   lastName: string;
 
-  @IsEmail()
+  @IsPhoneNumber()
   @IsNotEmpty()
-  email: string;
+  phoneNumber: string;
 
-  @IsEnum([USER_ROLES.YOUTH, USER_ROLES.EMPLOYER, USER_ROLES.MENTOR], { message: 'Valid role required' })
+  @IsEnum([USER_ROLES.YOUTH, USER_ROLES.EMPLOYER, USER_ROLES.MENTOR], {
+    message: 'Valid role required',
+  })
   @IsNotEmpty()
   role: 'youth' | 'mentor' | 'employer' = 'youth';
 

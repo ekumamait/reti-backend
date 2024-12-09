@@ -19,7 +19,7 @@ export default class CreateProfiles implements Seeder {
           },
           bio: 'Aspiring full-stack developer with a passion for web technologies.',
           location: 'San Francisco, CA',
-          phoneNumber: '123-456-7890',
+          email: 'john.doe@example.com',
         },
         {
           userId: 2, // Jane Smith (Mentor)
@@ -30,7 +30,7 @@ export default class CreateProfiles implements Seeder {
           },
           bio: 'Senior software engineer with 10+ years of experience, passionate about mentoring young developers.',
           location: 'New York, NY',
-          phoneNumber: '098-765-4321',
+          email: 'jane.smith@example.com',
         },
         {
           userId: 3, // Alice Johnson (Employer)
@@ -39,7 +39,7 @@ export default class CreateProfiles implements Seeder {
           stakeholderLinks: {},
           bio: 'Tech company founder looking to connect with talented youth and experienced mentors.',
           location: 'Seattle, WA',
-          phoneNumber: '555-555-5555',
+          email: 'alice.johnson@example.com',
         },
         {
           userId: 4, // Bob Brown (Youth)
@@ -51,7 +51,7 @@ export default class CreateProfiles implements Seeder {
           },
           bio: 'Data science enthusiast looking to break into the tech industry.',
           location: 'Boston, MA',
-          phoneNumber: '444-444-4444',
+          email: 'bob.brown@example.com',
         },
       ];
 

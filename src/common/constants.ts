@@ -2,6 +2,7 @@ export const USER_ROLES = {
   YOUTH: 'youth',
   MENTOR: 'mentor',
   EMPLOYER: 'employer',
+  ADMIN: 'admin',
 };
 
 export const ERROR_MESSAGES = {

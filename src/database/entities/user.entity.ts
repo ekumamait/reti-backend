@@ -9,6 +9,7 @@ import { Conversation } from './conversation.entity';
 import { Notification } from './notification.entity';
 import { Product } from './product.entity';
 import { Job } from './job.entity';
+import { IsPhoneNumber } from 'class-validator';
 
 @Entity()
 export class User {
@@ -22,7 +23,8 @@ export class User {
   lastName: string;
 
   @Column({ unique: true })
-  email: string;
+  @IsPhoneNumber(null)
+  phoneNumber: string;
 
   @Column({ default: 'youth' })
   role: 'youth' | 'mentor' | 'employer';

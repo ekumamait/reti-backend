@@ -60,6 +60,11 @@ export class ProfileDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
+  email?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
   phoneNumber?: string;
 
   @ApiProperty()

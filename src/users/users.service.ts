@@ -29,12 +29,16 @@ export class UsersService {
     return returnResponse(200, SUCCESS_MESSAGES.USERS_FOUND, users);
   }
 
-  async findOneByEmail(email: string): Promise<any> {
-    const user = await this.userRepository.findOne({ where: { email } });
+  async findOneByNumber(phoneNumber: string): Promise<any> {
+    const user = await this.userRepository.findOne({ where: { phoneNumber } });
     if (!user) {
-      throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND(email));
+      throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND(phoneNumber));
     }
-    return returnResponse(200, SUCCESS_MESSAGES.USER_EMAIL_FOUND(email), user);
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.USER_EMAIL_FOUND(phoneNumber),
+      user,
+    );
   }
 
   async findOne(id: number): Promise<UserDto> {
@@ -53,12 +57,12 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<ApiResponse<User>> {
     const existingUser = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
+      where: { phoneNumber: createUserDto.phoneNumber },
     });
 
     if (existingUser) {
       throw new ConflictException(
-        ERROR_MESSAGES.USER_ALREADY_EXISTS(createUserDto.email),
+        ERROR_MESSAGES.USER_ALREADY_EXISTS(createUserDto.phoneNumber),
       );
     }
 

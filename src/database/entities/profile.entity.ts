@@ -63,6 +63,9 @@ export class Profile {
   @Column({ nullable: true })
   gender: string;
 
+  @Column({ nullable: true })
+  email: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
