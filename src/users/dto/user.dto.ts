@@ -8,6 +8,7 @@ import {
   MinLength,
   isInt,
   isNotEmpty,
+  IsPhoneNumber,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { USER_ROLES } from '../../common/constants';
@@ -25,9 +26,9 @@ export class UserDto {
   @IsNotEmpty()
   lastName: string;
 
-  @IsEmail()
+  @IsPhoneNumber()
   @IsNotEmpty()
-  email: string;
+  phoneNumber: string;
 
   @IsString()
   @MinLength(8)

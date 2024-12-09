@@ -7,6 +7,7 @@ import {
   IsDate,
   IsNotEmpty,
   IsInt,
+  IsEmail,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { StakeholderLinksDto } from './profile.dto';
@@ -52,6 +53,11 @@ export class CreateProfileDto {
   @IsString()
   @IsNotEmpty()
   gender: string;
+
+  @ApiProperty({ required: false })
+  @IsEmail()
+  @IsOptional()
+  email: string;
 
   @IsInt()
   @IsNotEmpty()
