@@ -71,4 +71,7 @@ export class Profile {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ default: 'light' })
+  theme: 'light' | 'dark';
 }
