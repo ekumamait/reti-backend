@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -29,6 +30,19 @@ export class JobsService {
   ): Promise<ApiResponse<JobDto>> {
     if (employer.role !== 'employer') {
       throw new ForbiddenException('Only employers can create jobs');
+    }
+    const existingJob = await this.jobRepository.findOne({
+      where: {
+        title: createJobDto.title,
+        location: createJobDto.location,
+        employerId: employer.id,
+      },
+    });
+
+    if (existingJob) {
+      throw new ConflictException(
+        'A job with the same title and location already exists for this employer.',
+      );
     }
     const job = this.jobRepository.create({
       ...createJobDto,

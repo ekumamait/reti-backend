@@ -1,10 +1,24 @@
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsOptional,
   IsNumber,
   IsArray,
   IsEnum,
+  IsEmail,
+  IsDate,
+  ValidateNested,
 } from 'class-validator';
+
+class SalaryRange {
+  @IsNumber()
+  @IsOptional()
+  min?: number;
+
+  @IsNumber()
+  @IsOptional()
+  max?: number;
+}
 
 export class UpdateJobDto {
   @IsString()
@@ -19,9 +33,10 @@ export class UpdateJobDto {
   @IsOptional()
   location?: string;
 
-  @IsNumber()
+  @ValidateNested()
+  @Type(() => SalaryRange)
   @IsOptional()
-  salary?: number;
+  salary?: SalaryRange;
 
   @IsArray()
   @IsOptional()
@@ -36,4 +51,32 @@ export class UpdateJobDto {
   @IsOptional()
   @IsNumber({}, { each: true })
   interested?: number[];
+
+  @IsNumber()
+  @IsOptional()
+  positions?: number;
+
+  @IsString()
+  @IsOptional()
+  experience?: string;
+
+  @IsString()
+  @IsOptional()
+  jobCategory?: string;
+
+  @IsEnum(['fulltime', 'part-time', 'freelance'])
+  @IsOptional()
+  jobType?: 'fulltime' | 'part-time' | 'freelance';
+
+  @IsDate()
+  @IsOptional()
+  applicationDeadline?: Date;
+
+  @IsString()
+  @IsOptional()
+  companyName?: string;
+
+  @IsEmail()
+  @IsOptional()
+  contactEmail?: string;
 }

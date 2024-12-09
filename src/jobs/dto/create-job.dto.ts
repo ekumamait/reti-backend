@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -5,7 +6,18 @@ import {
   IsOptional,
   IsArray,
   IsEnum,
+  ValidateNested,
 } from 'class-validator';
+
+class SalaryRange {
+  @IsNumber()
+  @IsNotEmpty()
+  min: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  max: number;
+}
 
 export class CreateJobDto {
   @IsString()
@@ -20,9 +32,9 @@ export class CreateJobDto {
   @IsNotEmpty()
   location: string;
 
-  @IsNumber()
-  @IsNotEmpty()
-  salary: number;
+  @ValidateNested()
+  @Type(() => SalaryRange)
+  salary: SalaryRange;
 
   @IsArray()
   @IsOptional()

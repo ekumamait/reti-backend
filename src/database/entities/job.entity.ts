@@ -6,10 +6,12 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Unique,
 } from 'typeorm';
 import { User } from './user.entity';
 
 @Entity()
+@Unique(['title', 'location', 'employerId'])
 export class Job {
   @PrimaryGeneratedColumn()
   id: number;
@@ -23,8 +25,11 @@ export class Job {
   @Column()
   location: string;
 
-  @Column()
-  salary: number;
+  @Column('json')
+  salary: {
+    min: number;
+    max: number;
+  };
 
   @Column('text', { array: true, nullable: true })
   qualifications: string[];
@@ -41,6 +46,30 @@ export class Job {
 
   @Column()
   employerId: number;
+
+  @Column()
+  positions: number;
+
+  @Column()
+  experience: string;
+
+  @Column()
+  jobCategory: string;
+
+  @Column({
+    type: 'enum',
+    enum: ['fulltime', 'part-time', 'freelance'],
+  })
+  jobType: 'fulltime' | 'part-time' | 'freelance';
+
+  @Column()
+  applicationDeadline: Date;
+
+  @Column()
+  companyName: string;
+
+  @Column()
+  contactEmail: string;
 
   @CreateDateColumn()
   createdAt: Date;
