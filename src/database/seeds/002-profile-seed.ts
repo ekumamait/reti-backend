@@ -20,6 +20,9 @@ export default class CreateProfiles implements Seeder {
           bio: 'Aspiring full-stack developer with a passion for web technologies.',
           location: 'San Francisco, CA',
           email: 'john.doe@example.com',
+          dateOfBirth: new Date('1995-05-15'),
+          gender: 'male',
+          theme: 'light',
         },
         {
           userId: 2, // Jane Smith (Mentor)
@@ -31,6 +34,9 @@ export default class CreateProfiles implements Seeder {
           bio: 'Senior software engineer with 10+ years of experience, passionate about mentoring young developers.',
           location: 'New York, NY',
           email: 'jane.smith@example.com',
+          dateOfBirth: new Date('1985-08-20'),
+          gender: 'female',
+          theme: 'light',
         },
         {
           userId: 3, // Alice Johnson (Employer)
@@ -40,6 +46,9 @@ export default class CreateProfiles implements Seeder {
           bio: 'Tech company founder looking to connect with talented youth and experienced mentors.',
           location: 'Seattle, WA',
           email: 'alice.johnson@example.com',
+          dateOfBirth: new Date('1990-12-01'),
+          gender: 'female',
+          theme: 'light',
         },
         {
           userId: 4, // Bob Brown (Youth)
@@ -52,6 +61,9 @@ export default class CreateProfiles implements Seeder {
           bio: 'Data science enthusiast looking to break into the tech industry.',
           location: 'Boston, MA',
           email: 'bob.brown@example.com',
+          dateOfBirth: new Date('1998-03-10'),
+          gender: 'male',
+          theme: 'light',
         },
       ];
 

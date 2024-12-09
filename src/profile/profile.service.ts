@@ -55,7 +55,11 @@ export class ProfileService {
     if (!profile) {
       throw new NotFoundException(ERROR_MESSAGES.PROFILE_NOT_FOUND(userId));
     }
-    return returnResponse(200, SUCCESS_MESSAGES.PROFILE_FOUND(userId), profile);
+    const { password, ...userWithoutPassword } = profile.user;
+    return returnResponse(200, SUCCESS_MESSAGES.PROFILE_FOUND(userId), {
+      ...profile,
+      user: userWithoutPassword,
+    });
   }
 
   async update(
