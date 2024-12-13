@@ -11,7 +11,7 @@ import {
 import { User } from './user.entity';
 
 @Entity()
-@Unique(['title', 'location', 'employerId'])
+@Unique(['title', 'location', 'employer'])
 export class Job {
   @PrimaryGeneratedColumn()
   id: number;
@@ -41,11 +41,8 @@ export class Job {
   interested: number[];
 
   @ManyToOne(() => User, (user) => user.jobs)
-  @JoinColumn({ name: 'employerId' })
+  @JoinColumn({ name: 'employer' })
   employer: User;
-
-  @Column()
-  employerId: number;
 
   @Column()
   positions: number;

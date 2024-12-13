@@ -7,6 +7,9 @@ import {
   IsArray,
   IsEnum,
   ValidateNested,
+  IsDate,
+  IsEmail,
+  IsInt,
 } from 'class-validator';
 
 class SalaryRange {
@@ -49,4 +52,32 @@ export class CreateJobDto {
   @IsOptional()
   @IsNumber({}, { each: true })
   interested?: number[];
+
+  @IsInt()
+  @IsNotEmpty()
+  positions: number;
+
+  @IsString()
+  @IsNotEmpty()
+  experience: string;
+
+  @IsString()
+  @IsNotEmpty()
+  jobCategory: string;
+
+  @IsEnum(['fulltime', 'part-time', 'freelance'])
+  @IsNotEmpty()
+  jobType: 'fulltime' | 'part-time' | 'freelance';
+
+  @IsDate()
+  @IsNotEmpty()
+  applicationDeadline: Date;
+
+  @IsString()
+  @IsNotEmpty()
+  companyName: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  contactEmail: string;
 }
