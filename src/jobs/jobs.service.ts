@@ -35,7 +35,7 @@ export class JobsService {
       where: {
         title: createJobDto.title,
         location: createJobDto.location,
-        employerId: employer.id,
+        employer: { id: employer.id },
       },
     });
 
@@ -46,26 +46,30 @@ export class JobsService {
     }
     const job = this.jobRepository.create({
       ...createJobDto,
-      employerId: employer.id,
+      employer: employer,
     });
     const savedJob = await this.jobRepository.save(job);
     return returnResponse(201, SUCCESS_MESSAGES.JOB_CREATED, savedJob);
   }
 
   async getAllJobs(): Promise<ApiResponse<JobDto[]>> {
-    const jobs = await this.jobRepository.find();
+    const jobs = await this.jobRepository.find({ relations: ['employer'] });
     return returnResponse(200, SUCCESS_MESSAGES.JOBS_FOUND, jobs);
   }
 
-  async getEmployerJobs(employerID: number): Promise<ApiResponse<JobDto[]>> {
+  async getEmployerJobs(employerId: number): Promise<ApiResponse<JobDto[]>> {
     const jobs = await this.jobRepository.find({
-      where: { employerId: employerID },
+      where: { employer: { id: employerId } },
+      relations: ['employer'],
     });
     return returnResponse(200, SUCCESS_MESSAGES.JOBS_FOUND, jobs);
   }
 
   async getOneJob(id: number): Promise<ApiResponse<JobDto>> {
-    const job = await this.jobRepository.findOne({ where: { id: id } });
+    const job = await this.jobRepository.findOne({
+      where: { id: id },
+      relations: ['employer'],
+    });
     if (!job) {
       throw new NotFoundException(`Job with ID ${id} not found`);
     }
@@ -81,7 +85,8 @@ export class JobsService {
       throw new ForbiddenException('Only employers can update jobs');
     }
     const job = await this.jobRepository.findOne({
-      where: { id: jobId, employerId: employer.id },
+      where: { id: jobId, employer: { id: employer.id } },
+      relations: ['employer'],
     });
     if (!job) {
       throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
@@ -100,7 +105,7 @@ export class JobsService {
       throw new ForbiddenException('Only employers can delete jobs');
     }
     const job = await this.jobRepository.findOne({
-      where: { id: jobId, employerId: employer.id },
+      where: { id: jobId, employer: { id: employer.id } },
     });
     if (!job) {
       throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);

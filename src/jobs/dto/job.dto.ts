@@ -10,7 +10,10 @@ import {
   IsInt,
   IsEmail,
   ValidateNested,
+  IsObject,
 } from 'class-validator';
+import { User } from 'src/database/entities/user.entity';
+import { UserDto } from 'src/users/dto/user.dto';
 
 class SalaryRange {
   @IsNumber()
@@ -56,8 +59,8 @@ export class JobDto {
   @IsNumber({}, { each: true })
   interested?: number[];
 
-  @IsInt()
-  employerId: number;
+  @IsObject()
+  employer: User;
 
   @IsInt()
   @IsNotEmpty()
