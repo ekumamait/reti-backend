@@ -10,5 +10,6 @@ import { UsersService } from 'src/users/users.service';
   imports: [TypeOrmModule.forFeature([Conversation, User])],
   providers: [ConversationsService, UsersService],
   controllers: [ConversationsController],
+  exports: [ConversationsService],
 })
 export class ConversationsModule {}

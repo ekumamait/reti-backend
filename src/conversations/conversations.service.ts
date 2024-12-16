@@ -90,18 +90,39 @@ export class ConversationsService {
 
     const conversations = await this.conversationRepository
       .createQueryBuilder('conversation')
-      .where('conversation.messages @> :message', {
-        message: JSON.stringify([{ senderId: userId }]),
-      })
-      .orWhere('conversation.messages @> :message', {
-        message: JSON.stringify([{ receiverId: userId }]),
-      })
+      .where(
+        `EXISTS (
+        SELECT 1 FROM jsonb_array_elements(conversation.messages) AS msg
+        WHERE (msg->>'senderId')::int = :userId OR (msg->>'receiverId')::int = :userId
+      )`,
+        { userId },
+      )
       .getMany();
 
     return returnResponse(
       200,
       SUCCESS_MESSAGES.CONVERSATIONS_FOUND,
       conversations,
+    );
+  }
+
+  async getConversationMessages(
+    conversationId: number,
+  ): Promise<ApiResponse<any>> {
+    const conversation = await this.conversationRepository.findOne({
+      where: { id: conversationId },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException(
+        ERROR_MESSAGES.CONVERSATION_NOT_FOUND(conversationId),
+      );
+    }
+
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.MESSAGES_FOUND,
+      conversation.messages,
     );
   }
 

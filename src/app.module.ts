@@ -9,6 +9,7 @@ import { ProductsModule } from './products/products.module';
 import { JobsModule } from './jobs/jobs.module';
 import { InspirationsModule } from './inspirations/inspirations.module';
 import { MentorshipSessionsModule } from './mentorship-sessions/mentorship-sessions.module';
+import { ChatGateway } from './chat/chat.gateway';
 
 @Module({
   imports: [
@@ -34,5 +35,6 @@ import { MentorshipSessionsModule } from './mentorship-sessions/mentorship-sessi
     InspirationsModule,
     MentorshipSessionsModule,
   ],
+  providers: [ChatGateway],
 })
 export class AppModule {}
