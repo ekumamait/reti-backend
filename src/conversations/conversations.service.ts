@@ -37,7 +37,7 @@ export class ConversationsService {
 
     const detailedMessages = messages.map((message, index) => ({
       ...message,
-      senderId: userId,
+      senderId: Number(userId),
       id: message.id ?? Date.now() + index,
       createdAt: message.createdAt ?? new Date(),
       isRead: message.isRead ?? false,
@@ -46,11 +46,11 @@ export class ConversationsService {
     const existingConversation = await this.conversationRepository
       .createQueryBuilder('conversation')
       .where(
-        'conversation.messages @> :message1 OR conversation.messages @> :message2',
-        {
-          message1: JSON.stringify([{ senderId: userId, receiverId }]),
-          message2: JSON.stringify([{ senderId: userId, receiverId }]),
-        },
+        `EXISTS (
+        SELECT 1 FROM jsonb_array_elements(conversation.messages) AS msg
+        WHERE (msg->>'senderId')::int = :userId OR (msg->>'receiverId')::int = :userId
+      )`,
+        { userId },
       )
       .getOne();
     if (existingConversation) {

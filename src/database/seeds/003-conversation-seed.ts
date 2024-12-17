@@ -15,46 +15,17 @@ export default class CreateConversations implements Seeder {
       {
         messages: [
           {
-            receiverId: 2,
             content: 'Hello, how are you?',
+            receiverId: 2,
             isRead: false,
             id: 1,
             createdAt: new Date(),
           },
           {
-            receiverId: 1,
+            receiverId: 2,
             content: "I'm doing well, thanks!",
             isRead: false,
             id: 2,
-            createdAt: new Date(),
-          },
-        ],
-      },
-      {
-        messages: [
-          {
-            receiverId: 3,
-            content: 'Hey, are you available for a chat?',
-            isRead: false,
-            id: 3,
-            createdAt: new Date(),
-          },
-          {
-            receiverId: 10,
-            content: 'Sure! Let me know when.',
-            isRead: false,
-            id: 4,
-            createdAt: new Date(),
-          },
-        ],
-      },
-      {
-        messages: [
-          {
-            receiverId: 3,
-            content: 'Did you receive my last message?',
-            isRead: false,
-            id: 5,
             createdAt: new Date(),
           },
         ],
