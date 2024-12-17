@@ -10,8 +10,8 @@ import { Notification } from './notification.entity';
 import { Product } from './product.entity';
 import { Job } from './job.entity';
 import { IsPhoneNumber } from 'class-validator';
-import { Inspiration } from './inspiration.entity';
 import { MentorshipSession } from './mentorship-session.entity';
+import { Inspiration } from './inspiration.entity';
 
 @Entity()
 export class User {
@@ -46,9 +46,6 @@ export class User {
   @OneToMany(() => Job, (job) => job.employer)
   jobs: Job[];
 
-  @CreateDateColumn()
-  createdAt: Date;
-
   @OneToMany(() => Inspiration, (inspiration) => inspiration.mentor)
   inspirations: Inspiration[];
 
@@ -58,6 +55,6 @@ export class User {
   @OneToMany(() => MentorshipSession, (session) => session.youth)
   bookedSessions: MentorshipSession[];
 
-  @Column({ type: 'enum', enum: ['mentor', 'youth'], nullable: false })
-  role: string;
+  @CreateDateColumn()
+  createdAt: Date;
 }

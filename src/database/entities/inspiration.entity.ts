@@ -3,38 +3,32 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  JoinColumn,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
-@Entity('inspirations')
+@Entity()
 export class Inspiration {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column()
   title: string;
 
-  @Column({ type: 'text' })
+  @Column('text', { default: '' })
   content: string;
 
-  @Column({ type: 'int', default: 0 })
-  likes: number;
-
   @ManyToOne(() => User, (user) => user.inspirations)
-  @JoinColumn({ name: 'mentor_id' })
   mentor: User;
 
-  @Column({ type: 'uuid' })
-  mentorId: string;
+  @Column({ default: 0 })
+  likes: number;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: 'CURRENT_TIMESTAMP',
-  })
+  @UpdateDateColumn()
   updatedAt: Date;
 }

@@ -3,39 +3,40 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  JoinColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 
 @Entity('mentorship_sessions')
 export class MentorshipSession {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @ManyToOne(() => User, (user) => user.mentorSessions)
-  @JoinColumn({ name: 'mentor_id' })
+  @ManyToOne(() => User)
   mentor: User;
 
-  @Column({ type: 'uuid' })
-  mentorId: string;
-
-  @ManyToOne(() => User, (user) => user.bookedSessions)
-  @JoinColumn({ name: 'youth_id' })
+  @ManyToOne(() => User)
   youth: User;
 
-  @Column({ type: 'uuid' })
-  youthId: string;
-
-  @Column({ type: 'timestamp' })
+  @Column('timestamp')
   sessionDate: Date;
 
   @Column({
     type: 'enum',
-    enum: ['pending', 'confirmed', 'completed', 'cancelled'],
-    default: 'pending',
+    enum: ['PENDING', 'CONFIRMED', 'CANCELED', 'COMPLETED'],
+    default: 'PENDING',
   })
-  status: string;
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELED' | 'COMPLETED';
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column()
+  duration: number;
+
+  @Column({ nullable: true })
+  mentorId: number;
+
+  @Column('text', { nullable: true })
+  notes: string;
+
+  @CreateDateColumn()
   createdAt: Date;
 }

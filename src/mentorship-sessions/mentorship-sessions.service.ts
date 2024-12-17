@@ -1,28 +1,162 @@
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { MentorshipSession } from '../database/entities/mentorship-session.entity';
+import { UsersService } from '../users/users.service';
+import { CreateMentorshipSessionDto } from './dto/create-mentorship-session.dto';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../common/constants';
+import { ApiResponse, returnResponse } from 'src/common/response.util';
+import { UpdateMentorshipSessionDto } from './dto/update-mentorship-session.dto';
+import { UserDto } from 'src/users/dto/user.dto';
+import { MentorshipSessionDto } from './dto/mentorship-session.dto';
+
 @Injectable()
 export class MentorshipSessionsService {
   constructor(
     @InjectRepository(MentorshipSession)
-    private sessionsRepository: Repository<MentorshipSession>,
-    private userService: UserService,
+    private sessionRepository: Repository<MentorshipSession>,
+    private usersService: UsersService,
   ) {}
 
-  async bookSession(youthId: string, createDto: CreateMentorshipSessionDto) {
-    // Verify mentor exists
-    const mentor = await this.userService.findOne(createDto.mentorId);
-    const youth = await this.userService.findOne(youthId);
+  async bookSession(
+    youthId: number,
+    createDto: CreateMentorshipSessionDto,
+  ): Promise<ApiResponse<MentorshipSessionDto>> {
+    const youth = await this.usersService.findOne(youthId);
+    const mentor = await this.usersService.findOne(createDto.mentorId);
 
-    if (mentor.role !== 'mentor') {
-      throw new ForbiddenException('Can only book sessions with mentors');
+    if (!youth || !mentor) {
+      throw new NotFoundException('Youth or Mentor not found');
     }
 
-    const session = this.sessionsRepository.create({
-      ...createDto,
-      youth,
-      youthId,
-      mentor,
-      mentorId: createDto.mentorId,
+    if (youth.role !== 'youth') {
+      throw new UnauthorizedException('Only youth can book sessions');
+    }
+
+    const existingSession = await this.sessionRepository.findOne({
+      where: {
+        youth: { id: youth.id },
+        mentor: { id: mentor.id },
+        sessionDate: createDto.sessionDate,
+      },
     });
 
-    return this.sessionsRepository.save(session);
+    if (existingSession) {
+      throw new ConflictException(
+        'A Session with the same Mentor already exists for this profile.',
+      );
+    }
+
+    const session = this.sessionRepository.create({
+      youth: { id: youth.id },
+      mentor: { id: mentor.id },
+      sessionDate: createDto.sessionDate,
+      duration: createDto.duration,
+      notes: createDto.notes,
+      status: 'PENDING',
+    });
+
+    const savedSession = await this.sessionRepository.save(session);
+    return returnResponse(
+      201,
+      SUCCESS_MESSAGES.INSPIRATION_CREATED,
+      savedSession,
+    );
+  }
+
+  async getMentorSessions(
+    mentorId: number,
+  ): Promise<ApiResponse<MentorshipSession[]>> {
+    const sessions = await this.sessionRepository.find({
+      where: {
+        mentor: { id: mentorId },
+      },
+      relations: ['mentor', 'youth'],
+    });
+    return returnResponse(200, SUCCESS_MESSAGES.JOBS_FOUND, sessions);
+  }
+
+  async getAllSessions(): Promise<ApiResponse<MentorshipSession[]>> {
+    const sessions = await this.sessionRepository.find({
+      relations: ['mentor', 'youth'],
+    });
+    return returnResponse(200, SUCCESS_MESSAGES.SESSIONS_FOUND, sessions);
+  }
+
+  async getOneSession(
+    mentorId: number,
+  ): Promise<ApiResponse<MentorshipSession>> {
+    const session = await this.sessionRepository.findOne({
+      where: { id: mentorId },
+      relations: ['mentor', 'youth'],
+    });
+    if (!session) {
+      throw new NotFoundException(`Session with ID ${mentorId} not found`);
+    }
+    return returnResponse(200, SUCCESS_MESSAGES.SESSIONS_FOUND, session);
+  }
+
+  async getYouthSessions(
+    youthId: number,
+  ): Promise<ApiResponse<MentorshipSession[]>> {
+    const sessions = await this.sessionRepository.find({
+      where: {
+        youth: { id: youthId },
+      },
+      relations: ['mentor', 'youth'],
+    });
+    return returnResponse(200, SUCCESS_MESSAGES.SESSIONS_FOUND, sessions);
+  }
+
+  async updateSession(
+    mentor: UserDto,
+    sessionId: number,
+    updateDto: UpdateMentorshipSessionDto,
+  ): Promise<ApiResponse<MentorshipSessionDto>> {
+    if (mentor.role !== 'mentor') {
+      throw new ForbiddenException('Only mentor can update sessions');
+    }
+    const session = await this.sessionRepository.findOne({
+      where: {
+        id: sessionId,
+        mentor: { id: mentor.id },
+      },
+      relations: ['mentor', 'youth'],
+    });
+
+    if (!session) {
+      throw new NotFoundException(ERROR_MESSAGES.UNAUTHORIZED);
+    }
+
+    Object.assign(session, updateDto);
+    const updatedSession = await this.sessionRepository.save(session);
+
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.INSPIRATION_UPDATED,
+      updatedSession,
+    );
+  }
+
+  async cancelSession(sessionId: number, user: UserDto) {
+    const session = await this.sessionRepository.findOne({
+      where: [
+        { id: sessionId, mentor: { id: user.id } },
+        { id: sessionId, youth: { id: user.id } },
+      ],
+    });
+
+    if (!session) {
+      throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
+    }
+
+    session.status = 'CANCELED';
+    return this.sessionRepository.save(session);
   }
 }
