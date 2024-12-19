@@ -5,6 +5,13 @@ export const USER_ROLES = {
   ADMIN: 'admin',
 };
 
+export const MentorshipSessionStatus = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+};
+
 export const ERROR_MESSAGES = {
   USER_NOT_FOUND: (email: string) => `User with email ${email} not found`,
   PROFILE_NOT_FOUND: (id: number) => `Profile with ID ${id} not found`,
@@ -40,8 +47,12 @@ export const SUCCESS_MESSAGES = {
     `User with Email ${email} fetched successfully`,
   USERS_FOUND: 'Users fetched successfully',
   PROFILES_FOUND: 'Profiles fetched successfully',
+  INSPIRATIONS_FOUND: 'Inspirations fetched successfully',
+  INSPIRATION_UPDATED: 'Inspiration successfully updated',
+  INSPIRATION_DELETED: (id: number) =>
+    `Inspiration with ID ${id} deleted successfully`,
   NOTIFICATION_CREATED: 'Notification successfully created',
-
+  INSPIRATION_CREATED: 'Inspiration successfully created',
   CONVERSATION_CREATED: 'Conversation successfully created',
   MESSAGE_SENT: 'Message successfully sent',
   MESSAGE_UPDATED: 'Message successfully updated',
@@ -59,6 +70,7 @@ export const SUCCESS_MESSAGES = {
   PRODUCTS_FOUND: 'Products fetched successfully',
   JOB_CREATED: 'Job successfully created',
   JOBS_FOUND: 'Jobs fetched successfully',
+  SESSIONS_FOUND: 'Sessions fetched successfully',
   JOB_UPDATED: 'Job successfully updated',
   JOB_DELETED: 'Job successfully deleted',
 };
