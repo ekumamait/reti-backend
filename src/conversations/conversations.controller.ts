@@ -65,6 +65,13 @@ export class ConversationsController {
     );
   }
 
+  @Get(':conversationId/messages')
+  async getConversationMessages(
+    @Param('conversationId') conversationId: number,
+  ): Promise<ApiResponse<any>> {
+    return this.conversationsService.getConversationMessages(conversationId);
+  }
+
   @Delete(':conversationId')
   async deleteConversation(
     @Param('conversationId') conversationId: number,

@@ -37,7 +37,7 @@ export class ConversationsService {
 
     const detailedMessages = messages.map((message, index) => ({
       ...message,
-      senderId: userId,
+      senderId: Number(userId),
       id: message.id ?? Date.now() + index,
       createdAt: message.createdAt ?? new Date(),
       isRead: message.isRead ?? false,
@@ -46,11 +46,11 @@ export class ConversationsService {
     const existingConversation = await this.conversationRepository
       .createQueryBuilder('conversation')
       .where(
-        'conversation.messages @> :message1 OR conversation.messages @> :message2',
-        {
-          message1: JSON.stringify([{ senderId: userId, receiverId }]),
-          message2: JSON.stringify([{ senderId: userId, receiverId }]),
-        },
+        `EXISTS (
+        SELECT 1 FROM jsonb_array_elements(conversation.messages) AS msg
+        WHERE (msg->>'senderId')::int = :userId OR (msg->>'receiverId')::int = :userId
+      )`,
+        { userId },
       )
       .getOne();
     if (existingConversation) {
@@ -90,18 +90,39 @@ export class ConversationsService {
 
     const conversations = await this.conversationRepository
       .createQueryBuilder('conversation')
-      .where('conversation.messages @> :message', {
-        message: JSON.stringify([{ senderId: userId }]),
-      })
-      .orWhere('conversation.messages @> :message', {
-        message: JSON.stringify([{ receiverId: userId }]),
-      })
+      .where(
+        `EXISTS (
+        SELECT 1 FROM jsonb_array_elements(conversation.messages) AS msg
+        WHERE (msg->>'senderId')::int = :userId OR (msg->>'receiverId')::int = :userId
+      )`,
+        { userId },
+      )
       .getMany();
 
     return returnResponse(
       200,
       SUCCESS_MESSAGES.CONVERSATIONS_FOUND,
       conversations,
+    );
+  }
+
+  async getConversationMessages(
+    conversationId: number,
+  ): Promise<ApiResponse<any>> {
+    const conversation = await this.conversationRepository.findOne({
+      where: { id: conversationId },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException(
+        ERROR_MESSAGES.CONVERSATION_NOT_FOUND(conversationId),
+      );
+    }
+
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.MESSAGES_FOUND,
+      conversation.messages,
     );
   }
 

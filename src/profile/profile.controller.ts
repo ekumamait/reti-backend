@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
@@ -42,8 +43,10 @@ export class ProfileController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<ApiResponse<ProfileDto>> {
-    return this.profileService.findByUserId(+id);
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiResponse<ProfileDto>> {
+    return this.profileService.findByUserId(id);
   }
 
   @Patch(':id')
