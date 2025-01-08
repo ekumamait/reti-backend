@@ -31,6 +31,9 @@ export class User {
   @Column({ default: 'youth' })
   role: 'youth' | 'mentor' | 'employer';
 
+  @Column({ default: false })
+  isOnboarded: boolean;
+
   @OneToMany(() => Notification, (notification) => notification.user)
   notifications: Notification[];
 

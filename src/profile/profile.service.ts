@@ -31,6 +31,10 @@ export class ProfileService {
       user,
     });
     const savedProfile = await this.profileRepository.save(profile);
+
+    user.isOnboarded = true;
+    await this.userRepository.save(user);
+
     return returnResponse(201, SUCCESS_MESSAGES.PROFILE_CREATED, savedProfile);
   }
 

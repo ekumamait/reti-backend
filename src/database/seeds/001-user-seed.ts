@@ -17,6 +17,7 @@ export default class CreateUsers implements Seeder {
           phoneNumber: '+256705999231',
           role: 'youth',
           password: hashedPassword,
+          isOnboarded: true,
         },
         {
           id: 2,
@@ -25,6 +26,7 @@ export default class CreateUsers implements Seeder {
           phoneNumber: '+256705999232',
           role: 'mentor',
           password: hashedPassword,
+          isOnboarded: true,
         },
         {
           id: 3,
@@ -33,6 +35,7 @@ export default class CreateUsers implements Seeder {
           phoneNumber: '+256705999233',
           role: 'employer',
           password: hashedPassword,
+          isOnboarded: true,
         },
         {
           id: 4,
@@ -41,6 +44,7 @@ export default class CreateUsers implements Seeder {
           phoneNumber: '+256705999234',
           role: 'youth',
           password: hashedPassword,
+          isOnboarded: true,
         },
         {
           id: 5,
@@ -49,6 +53,7 @@ export default class CreateUsers implements Seeder {
           phoneNumber: '+256705999235',
           role: 'employer',
           password: hashedPassword,
+          isOnboarded: false,
         },
         {
           id: 6,
@@ -57,6 +62,7 @@ export default class CreateUsers implements Seeder {
           phoneNumber: '+256705999236',
           role: 'mentor',
           password: hashedPassword,
+          isOnboarded: false,
         },
       ];
 
