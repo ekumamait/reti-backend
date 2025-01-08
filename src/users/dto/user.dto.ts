@@ -9,6 +9,7 @@ import {
   isInt,
   isNotEmpty,
   IsPhoneNumber,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { USER_ROLES } from '../../common/constants';
@@ -40,4 +41,7 @@ export class UserDto {
   })
   @IsNotEmpty()
   role: 'youth' | 'mentor' | 'employer' = 'youth';
+
+  @IsBoolean()
+  isOnboarded = false;
 }
