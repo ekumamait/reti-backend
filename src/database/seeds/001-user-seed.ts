@@ -68,9 +68,10 @@ export default class CreateUsers implements Seeder {
           id: 6,
           firstName: 'Patrick',
           lastName: 'Eriga',
-          phoneNumber: '+256705999245',
+          phoneNumber: '+256705999237',
           role: 'admin',
           password: hashedPassword,
+          isOnboarded: true,
         },
       ];
 
