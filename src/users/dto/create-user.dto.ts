@@ -27,7 +27,7 @@ export class CreateUserDto {
     message: 'Valid role required',
   })
   @IsNotEmpty()
-  role: 'youth' | 'mentor' | 'employer' = 'youth';
+  role: 'youth' | 'mentor' | 'employer' | 'admin' = 'youth';
 
   @IsString()
   @MinLength(8)

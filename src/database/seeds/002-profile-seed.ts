@@ -51,6 +51,21 @@ export default class CreateProfiles implements Seeder {
           theme: 'light',
         },
         {
+          userId: 6, // patrick eriga (admin)
+          profileImage: 'https://example.com/profiles/bob-brown.jpg',
+          skills: ['Python', 'Data Science', 'Machine Learning'],
+          stakeholderLinks: {
+            mentors: [],
+            employers: [],
+          },
+          bio: 'Best admin',
+          location: 'Kampala UG',
+          email: 'patrick.rick@example.com',
+          dateOfBirth: new Date('1998-03-10'),
+          gender: 'male',
+          theme: 'light',
+        },
+        {
           userId: 4, // Bob Brown (Youth)
           profileImage: 'https://example.com/profiles/bob-brown.jpg',
           skills: ['Python', 'Data Science', 'Machine Learning'],

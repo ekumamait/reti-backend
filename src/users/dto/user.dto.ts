@@ -40,8 +40,5 @@ export class UserDto {
     message: 'Valid role required',
   })
   @IsNotEmpty()
-  role: 'youth' | 'mentor' | 'employer' = 'youth';
-
-  @IsBoolean()
-  isOnboarded = false;
+  role: 'youth' | 'mentor' | 'employer' | 'admin' = 'youth';
 }

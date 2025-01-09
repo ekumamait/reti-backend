@@ -64,6 +64,14 @@ export default class CreateUsers implements Seeder {
           password: hashedPassword,
           isOnboarded: false,
         },
+        {
+          id: 6,
+          firstName: 'Patrick',
+          lastName: 'Eriga',
+          phoneNumber: '+256705999245',
+          role: 'admin',
+          password: hashedPassword,
+        },
       ];
 
       await connection.query(

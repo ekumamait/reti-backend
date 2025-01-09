@@ -16,8 +16,10 @@ export class UpdateUserDto {
   lastName?: string;
 
   @IsOptional()
-  @IsEnum(['youth', 'mentor', 'employer'], { message: 'Valid role required' })
-  role?: 'youth' | 'mentor' | 'employer';
+  @IsEnum(['youth', 'mentor', 'employer', 'admin'], {
+    message: 'Valid role required',
+  })
+  role?: 'youth' | 'mentor' | 'employer' | 'admin';
 
   @IsOptional()
   @IsString()
