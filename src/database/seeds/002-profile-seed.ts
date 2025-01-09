@@ -65,6 +65,25 @@ export default class CreateProfiles implements Seeder {
           gender: 'male',
           theme: 'light',
         },
+        {
+          userId: 6, // Patrick Eriga (admin)
+          profileImage: 'https://example.com/profiles/bob-brown.jpg',
+          skills: [
+            'Human Resource Management',
+            'Data Collection',
+            'Supervision',
+          ],
+          stakeholderLinks: {
+            mentors: [],
+            employers: [],
+          },
+          bio: 'Best admin ever',
+          location: 'Kampala UG',
+          email: 'patrick.eriga@reti.com',
+          dateOfBirth: new Date('1991-03-10'),
+          gender: 'male',
+          theme: 'light',
+        },
       ];
 
       await connection

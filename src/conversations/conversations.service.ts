@@ -48,9 +48,12 @@ export class ConversationsService {
       .where(
         `EXISTS (
         SELECT 1 FROM jsonb_array_elements(conversation.messages) AS msg
-        WHERE (msg->>'senderId')::int = :userId OR (msg->>'receiverId')::int = :userId
+        WHERE 
+          (msg->>'senderId')::int = :userId AND (msg->>'receiverId')::int = :receiverId
+          OR 
+          (msg->>'senderId')::int = :receiverId AND (msg->>'receiverId')::int = :userId
       )`,
-        { userId },
+        { userId, receiverId },
       )
       .getOne();
     if (existingConversation) {
