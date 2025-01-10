@@ -29,8 +29,8 @@ export class Product {
   @Column({ default: 0 })
   stockQuantity: number;
 
-  @Column({ nullable: true })
-  imageUrl: string;
+  @Column('text', { array: true, nullable: true })
+  imageUrl: string[];
 
   @Column({ default: true })
   isActive: boolean;

@@ -5,6 +5,7 @@ import {
   IsPositive,
   IsOptional,
   IsUrl,
+  IsArray,
 } from 'class-validator';
 
 export class CreateProductDto {
@@ -31,6 +32,7 @@ export class CreateProductDto {
   stockQuantity: number;
 
   @IsOptional()
-  @IsUrl()
-  imageUrl?: string;
+  @IsArray()
+  @IsString({ each: true })
+  imageUrl?: string[];
 }
