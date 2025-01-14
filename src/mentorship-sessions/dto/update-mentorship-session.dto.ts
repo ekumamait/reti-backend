@@ -13,6 +13,15 @@ import { Type } from 'class-transformer';
 import { FutureDateValidator } from '../../common/validators/future-date.validator';
 
 export class UpdateMentorshipSessionDto {
+  @IsString()
+  @IsOptional()
+  @MaxLength(20)
+  title: string;
+
+  @IsString()
+  @IsOptional()
+  meetingLink: string;
+
   @IsOptional()
   @IsDate()
   @Type(() => Date)

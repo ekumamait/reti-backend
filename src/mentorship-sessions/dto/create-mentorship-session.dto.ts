@@ -16,9 +16,17 @@ import { FutureDateValidator } from '../../common/validators/future-date.validat
 import { MentorshipSessionStatus } from '../../common/constants';
 
 export class CreateMentorshipSessionDto {
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
   @IsNumber()
   @IsNotEmpty({ message: 'Mentor ID is required' })
   mentorId: number;
+
+  @IsString()
+  @IsNotEmpty()
+  meetingLink: string;
 
   @IsDate()
   @Type(() => Date)
