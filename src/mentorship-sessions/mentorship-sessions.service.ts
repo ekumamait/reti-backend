@@ -70,6 +70,13 @@ export class MentorshipSessionsService {
     );
   }
 
+  async getAllSessions(): Promise<ApiResponse<MentorshipSession[]>> {
+    const sessions = await this.sessionRepository.find({
+      relations: ['mentor', 'youth'],
+    });
+    return returnResponse(200, SUCCESS_MESSAGES.SESSIONS_FOUND, sessions);
+  }
+
   async getMentorSessions(
     mentorId: number,
   ): Promise<ApiResponse<MentorshipSession[]>> {
@@ -79,11 +86,16 @@ export class MentorshipSessionsService {
       },
       relations: ['mentor', 'youth'],
     });
-    return returnResponse(200, SUCCESS_MESSAGES.JOBS_FOUND, sessions);
+    return returnResponse(200, SUCCESS_MESSAGES.SESSIONS_FOUND, sessions);
   }
 
-  async getAllSessions(): Promise<ApiResponse<MentorshipSession[]>> {
+  async getYouthSessions(
+    youthId: number,
+  ): Promise<ApiResponse<MentorshipSession[]>> {
     const sessions = await this.sessionRepository.find({
+      where: {
+        youth: { id: youthId },
+      },
       relations: ['mentor', 'youth'],
     });
     return returnResponse(200, SUCCESS_MESSAGES.SESSIONS_FOUND, sessions);
@@ -100,18 +112,6 @@ export class MentorshipSessionsService {
       throw new NotFoundException(`Session with ID ${mentorId} not found`);
     }
     return returnResponse(200, SUCCESS_MESSAGES.SESSIONS_FOUND, session);
-  }
-
-  async getYouthSessions(
-    youthId: number,
-  ): Promise<ApiResponse<MentorshipSession[]>> {
-    const sessions = await this.sessionRepository.find({
-      where: {
-        youth: { id: youthId },
-      },
-      relations: ['mentor', 'youth'],
-    });
-    return returnResponse(200, SUCCESS_MESSAGES.SESSIONS_FOUND, sessions);
   }
 
   async updateSession(

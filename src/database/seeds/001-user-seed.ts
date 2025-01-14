@@ -65,7 +65,7 @@ export default class CreateUsers implements Seeder {
           isOnboarded: false,
         },
         {
-          id: 6,
+          id: 7,
           firstName: 'Patrick',
           lastName: 'Eriga',
           phoneNumber: '+256705999237',

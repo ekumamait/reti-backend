@@ -66,7 +66,7 @@ export default class CreateProfiles implements Seeder {
           theme: 'light',
         },
         {
-          userId: 6, // Patrick Eriga (admin)
+          userId: 7, // Patrick Eriga (admin)
           profileImage: 'https://example.com/profiles/bob-brown.jpg',
           skills: [
             'Human Resource Management',

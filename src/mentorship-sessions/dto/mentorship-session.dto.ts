@@ -1,6 +1,12 @@
 import { IsString, IsDate, IsEnum, IsNumber } from 'class-validator';
 
 export class MentorshipSessionDto {
+  @IsString()
+  title: string;
+
+  @IsString()
+  meetingLink: string;
+
   @IsNumber()
   mentorId: number;
 

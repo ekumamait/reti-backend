@@ -18,6 +18,9 @@ export class MentorshipSession {
   @ManyToOne(() => User)
   youth: User;
 
+  @Column()
+  title: string;
+
   @Column('timestamp')
   sessionDate: Date;
 
@@ -30,6 +33,9 @@ export class MentorshipSession {
 
   @Column()
   duration: number;
+
+  @Column({ nullable: true })
+  meetingLink: string;
 
   @Column({ nullable: true })
   mentorId: number;

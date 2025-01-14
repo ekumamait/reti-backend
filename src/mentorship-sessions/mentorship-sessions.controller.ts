@@ -38,20 +38,13 @@ export class MentorshipSessionsController {
     return this.mentorshipSessionsService.bookSession(req.user.id, createDto);
   }
 
-  @Get()
+  @Get('admin')
   @Roles('admin')
   async getAllSessions(): Promise<ApiResponse<MentorshipSessionDto[]>> {
     return this.mentorshipSessionsService.getAllSessions();
   }
 
-  @Get(':id')
-  async getOneSession(
-    @Param('id') id: number,
-  ): Promise<ApiResponse<MentorshipSessionDto>> {
-    return this.mentorshipSessionsService.getOneSession(id);
-  }
-
-  @Get()
+  @Get('mentor')
   @Roles('mentor')
   async getMentorSessions(
     @Request() req: RequestWithUser,
@@ -59,12 +52,19 @@ export class MentorshipSessionsController {
     return this.mentorshipSessionsService.getMentorSessions(req.user.id);
   }
 
-  @Get()
+  @Get('youth')
   @Roles('youth')
   async getYouthSessions(
     @Request() req: RequestWithUser,
   ): Promise<ApiResponse<MentorshipSessionDto[]>> {
     return this.mentorshipSessionsService.getYouthSessions(req.user.id);
+  }
+
+  @Get(':id')
+  async getOneSession(
+    @Param('id') id: number,
+  ): Promise<ApiResponse<MentorshipSessionDto>> {
+    return this.mentorshipSessionsService.getOneSession(id);
   }
 
   @Patch(':id')
