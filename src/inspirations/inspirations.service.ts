@@ -73,6 +73,20 @@ export class InspirationsService {
     );
   }
 
+  async getMentorInspirations(
+    mentorId: number,
+  ): Promise<ApiResponse<InspirationDto[]>> {
+    const inspirations = await this.inspirationsRepository.find({
+      where: { mentor: { id: mentorId } },
+      relations: ['mentor'],
+    });
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.INSPIRATIONS_FOUND,
+      inspirations,
+    );
+  }
+
   async getOneInspiration(id: number): Promise<ApiResponse<InspirationDto>> {
     const inspiration = await this.inspirationsRepository.findOne({
       where: { id: id },
@@ -86,15 +100,6 @@ export class InspirationsService {
       SUCCESS_MESSAGES.INSPIRATIONS_FOUND,
       inspiration,
     );
-  }
-
-  async getMentorInspirations(mentorId: number) {
-    const jobs = await this.inspirationsRepository.find({
-      where: { mentor: { id: mentorId } },
-      relations: ['mentor'],
-    });
-
-    return returnResponse(200, SUCCESS_MESSAGES.JOBS_FOUND, jobs);
   }
 
   async updateInspiration(
