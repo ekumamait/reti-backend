@@ -42,6 +42,13 @@ export class InspirationsController {
     return this.inspirationsService.getAllInspirations();
   }
 
+  @Get('mentor')
+  async getMentorInspirations(
+    @Request() req: RequestWithUser,
+  ): Promise<ApiResponse<InspirationDto[]>> {
+    return this.inspirationsService.getMentorInspirations(req.user.id);
+  }
+
   @Get(':id')
   async getOneInspiration(
     @Param('id') id: number,
