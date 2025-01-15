@@ -15,7 +15,6 @@ import { FutureDateValidator } from '../../common/validators/future-date.validat
 export class UpdateMentorshipSessionDto {
   @IsString()
   @IsOptional()
-  @MaxLength(20)
   title: string;
 
   @IsString()
@@ -33,7 +32,7 @@ export class UpdateMentorshipSessionDto {
   @IsNumber()
   @IsOptional()
   @Min(30)
-  @Max(180)
+  @Max(60)
   duration: number;
 
   @IsOptional()

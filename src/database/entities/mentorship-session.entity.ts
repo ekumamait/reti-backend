@@ -18,7 +18,7 @@ export class MentorshipSession {
   @ManyToOne(() => User)
   youth: User;
 
-  @Column()
+  @Column({ nullable: true })
   title: string;
 
   @Column('timestamp')
