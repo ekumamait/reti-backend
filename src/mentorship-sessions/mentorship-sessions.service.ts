@@ -59,7 +59,9 @@ export class MentorshipSessionsService {
       sessionDate: createDto.sessionDate,
       duration: createDto.duration,
       notes: createDto.notes,
-      status: 'PENDING',
+      meetingLink: createDto.meetingLink,
+      status: createDto.status,
+      title: createDto.title,
     });
 
     const savedSession = await this.sessionRepository.save(session);
