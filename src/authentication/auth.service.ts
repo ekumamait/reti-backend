@@ -40,7 +40,7 @@ export class AuthService {
     const token = this.jwtService.sign(payload);
     return {
       access_token: token,
-      expires_in: 3600,
+      expires_in: 7200,
       user: userWithoutPassword,
     };
   }
