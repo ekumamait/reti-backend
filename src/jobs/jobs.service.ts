@@ -15,6 +15,7 @@ import { JobDto } from './dto/job.dto';
 import { ApiResponse, returnResponse } from 'src/common/response.util';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from 'src/common/constants';
 import { UserDto } from 'src/users/dto/user.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class JobsService {
@@ -23,6 +24,7 @@ export class JobsService {
     private jobRepository: Repository<Job>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private notificationService: NotificationsService,
   ) {}
   async createJob(
     employer: UserDto,
@@ -44,10 +46,21 @@ export class JobsService {
         'A job with the same title and location already exists for this employer.',
       );
     }
+    const allUsers = await this.userRepository.find();
     const job = this.jobRepository.create({
       ...createJobDto,
       employer: employer,
     });
+    if (job) {
+      const youthUsers = allUsers.filter((user) => user.role === 'youth');
+      for (const user of youthUsers) {
+        await this.notificationService.create({
+          title: 'New Job Opportunity',
+          userId: user?.id,
+          message: 'Head over to the Opportunities page to check it out',
+        });
+      }
+    }
     const savedJob = await this.jobRepository.save(job);
     return returnResponse(201, SUCCESS_MESSAGES.JOB_CREATED, savedJob);
   }

@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
   ConflictException,
 } from '@nestjs/common';
+import dayjs from 'dayjs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MentorshipSession } from '../database/entities/mentorship-session.entity';
@@ -59,10 +60,13 @@ export class MentorshipSessionsService {
     });
 
     const savedSession = await this.sessionRepository.save(session);
+    const formattedDate = dayjs(createDto.sessionDate).format(
+      'MMMM D, YYYY h:mm A',
+    );
     await this.notifyUsers(
       [mentor.id, youth.id],
       'New Session',
-      `Session booked for ${createDto.sessionDate}`,
+      `Session booked for ${formattedDate}`,
     );
     return returnResponse(201, SUCCESS_MESSAGES.SESSION_CREATED, savedSession);
   }
@@ -158,11 +162,14 @@ export class MentorshipSessionsService {
       throw new UnauthorizedException('Not authorized to cancel this session');
 
     session.status = MentorshipSessionStatus.CANCELED;
+    const formattedDate = dayjs(session.sessionDate).format(
+      'MMMM D, YYYY h:mm A',
+    );
     await this.sessionRepository.save(session);
     await this.notifyUsers(
       [session?.youth.id, session?.mentor.id],
       'Session Canceled',
-      `Session scheduled for ${session?.sessionDate} has been canceled.`,
+      `Session scheduled for ${formattedDate} has been canceled.`,
     );
   }
 
