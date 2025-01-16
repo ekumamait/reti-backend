@@ -83,9 +83,9 @@ export class MentorshipSessionsController {
 
   @Delete(':id')
   async cancelSession(
-    @Param('id') sessionId: number,
+    @Param('id') session: any,
     @Request() req: RequestWithUser,
   ) {
-    return this.mentorshipSessionsService.cancelSession(sessionId, req.user);
+    return this.mentorshipSessionsService.cancelSession(session, req.user);
   }
 }
