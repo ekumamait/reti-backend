@@ -13,8 +13,6 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { FutureDateValidator } from '../../common/validators/future-date.validator';
-import { MentorshipSessionStatus } from '../../common/constants';
-
 export class CreateMentorshipSessionDto {
   @IsString()
   @IsNotEmpty()

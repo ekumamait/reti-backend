@@ -5,12 +5,12 @@ export const USER_ROLES = {
   ADMIN: 'admin',
 };
 
-export const MentorshipSessionStatus = {
-  PENDING: 'PENDING',
-  CONFIRMED: 'CONFIRMED',
-  COMPLETED: 'COMPLETED',
-  CANCELLED: 'CANCELLED',
-};
+export enum MentorshipSessionStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  COMPLETED = 'COMPLETED',
+  CANCELED = 'CANCELED',
+}
 
 export const ERROR_MESSAGES = {
   USER_NOT_FOUND: (email: string) => `User with email ${email} not found`,
@@ -70,7 +70,9 @@ export const SUCCESS_MESSAGES = {
   PRODUCTS_FOUND: 'Products fetched successfully',
   JOB_CREATED: 'Job successfully created',
   JOBS_FOUND: 'Jobs fetched successfully',
+  SESSION_CREATED: 'Session successfully created',
   SESSIONS_FOUND: 'Sessions fetched successfully',
+  SESSION_UPDATED: 'Session successfully updated',
   JOB_UPDATED: 'Job successfully updated',
   JOB_DELETED: 'Job successfully deleted',
 };
