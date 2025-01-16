@@ -6,6 +6,7 @@ import { MentorshipSession } from '../database/entities/mentorship-session.entit
 import { MentorshipSessionsService } from './mentorship-sessions.service';
 import { MentorshipSessionsController } from './mentorship-sessions.controller';
 import { InspirationsModule } from '../inspirations/inspirations.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { InspirationsModule } from '../inspirations/inspirations.module';
     UsersModule,
     AuthModule,
     InspirationsModule,
+    NotificationsModule,
   ],
   controllers: [MentorshipSessionsController],
   providers: [MentorshipSessionsService],

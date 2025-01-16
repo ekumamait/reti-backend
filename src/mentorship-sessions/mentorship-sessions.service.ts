@@ -15,6 +15,7 @@ import { ApiResponse, returnResponse } from 'src/common/response.util';
 import { UpdateMentorshipSessionDto } from './dto/update-mentorship-session.dto';
 import { UserDto } from 'src/users/dto/user.dto';
 import { MentorshipSessionDto } from './dto/mentorship-session.dto';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class MentorshipSessionsService {
@@ -22,6 +23,7 @@ export class MentorshipSessionsService {
     @InjectRepository(MentorshipSession)
     private sessionRepository: Repository<MentorshipSession>,
     private usersService: UsersService,
+    private notificationService: NotificationsService,
   ) {}
 
   async bookSession(
@@ -65,6 +67,13 @@ export class MentorshipSessionsService {
     });
 
     const savedSession = await this.sessionRepository.save(session);
+    if (savedSession) {
+      this.notificationService.create({
+        title: 'New Session',
+        userId: mentor.id,
+        message: `You have a new session with ${youth.firstName} || ${mentor.firstName} on ${createDto.sessionDate}`,
+      });
+    }
     return returnResponse(
       201,
       SUCCESS_MESSAGES.INSPIRATION_CREATED,
@@ -136,8 +145,19 @@ export class MentorshipSessionsService {
       throw new NotFoundException(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
+    if (updateDto.status === 'CANCELED') {
+      this.cancelSession(sessionId, mentor);
+    }
+
     Object.assign(session, updateDto);
     const updatedSession = await this.sessionRepository.save(session);
+    if (updatedSession) {
+      this.notificationService.create({
+        title: 'Session Update',
+        userId: mentor.id,
+        message: `You have a new session update with ${mentor.firstName} on ${updateDto.sessionDate}`,
+      });
+    }
 
     return returnResponse(
       200,
@@ -159,6 +179,13 @@ export class MentorshipSessionsService {
     }
 
     session.status = 'CANCELED';
-    return this.sessionRepository.save(session);
+    const cancelledSession = this.sessionRepository.save(session);
+    if (cancelledSession) {
+      this.notificationService.create({
+        title: 'Session CANCELED',
+        userId: user.id,
+        message: `Your session with ${user.firstName} has been canceled`,
+      });
+    }
   }
 }
