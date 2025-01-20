@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { User } from '../database/entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -13,49 +13,197 @@ import * as bcrypt from 'bcrypt';
 import { UserDto } from './dto/user.dto';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../common/constants';
 import { returnResponse, ApiResponse } from '../common/response.util';
+import { UserQueryDto } from './dto/user-query.dto';
+import {
+  PaginatedResponse,
+  getPaginationParams,
+  createPaginatedResponse,
+} from '../common/pagination.util';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
   ) {}
 
-  async findAll(): Promise<ApiResponse<User[]>> {
-    const users = await this.userRepository.find();
-    if (!users) {
-      throw new NotFoundException(ERROR_MESSAGES.USERS_NOT_FOUND());
+  async findAll(query?: UserQueryDto): Promise<PaginatedResponse<User>> {
+    const { page, limit, skip, search, sortBy, sortOrder } =
+      getPaginationParams(query || {});
+
+    const whereClause: any = {};
+    if (search) {
+      whereClause.phoneNumber = ILike(`%${search}%`);
     }
-    return returnResponse(200, SUCCESS_MESSAGES.USERS_FOUND, users);
+    if (query?.role) {
+      whereClause.role = query.role;
+    }
+
+    const [users, total] = await this.userRepository.findAndCount({
+      where: whereClause,
+      skip,
+      take: limit,
+      order: { [sortBy]: sortOrder },
+      select: [
+        'id',
+        'firstName',
+        'lastName',
+        'phoneNumber',
+        'role',
+        'isOnboarded',
+        'createdAt',
+      ],
+    });
+
+    return createPaginatedResponse(
+      200,
+      'Users fetched successfully',
+      users,
+      total,
+      page,
+      limit,
+    );
   }
 
-  async findOneByNumber(phoneNumber: string): Promise<any> {
-    const user = await this.userRepository.findOne({ where: { phoneNumber } });
-    if (!user) {
-      throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND(phoneNumber));
+  async findMentors(query?: UserQueryDto): Promise<PaginatedResponse<User>> {
+    const { page, limit, skip, search, sortBy, sortOrder } =
+      getPaginationParams(query || {});
+
+    const whereClause: any = {
+      role: 'mentor',
+    };
+    if (search) {
+      whereClause.phoneNumber = ILike(`%${search}%`);
     }
+
+    const [mentors, total] = await this.userRepository.findAndCount({
+      where: whereClause,
+      skip,
+      take: limit,
+      order: { [sortBy]: sortOrder },
+      select: [
+        'id',
+        'firstName',
+        'lastName',
+        'phoneNumber',
+        'role',
+        'isOnboarded',
+        'createdAt',
+      ],
+    });
+
+    return createPaginatedResponse(
+      200,
+      'Mentors fetched successfully',
+      mentors,
+      total,
+      page,
+      limit,
+    );
+  }
+
+  async findEmployers(query?: UserQueryDto): Promise<PaginatedResponse<User>> {
+    const { page, limit, skip, search, sortBy, sortOrder } =
+      getPaginationParams(query || {});
+
+    const whereClause: any = {
+      role: 'employer',
+    };
+    if (search) {
+      whereClause.phoneNumber = ILike(`%${search}%`);
+    }
+
+    const [employers, total] = await this.userRepository.findAndCount({
+      where: whereClause,
+      skip,
+      take: limit,
+      order: { [sortBy]: sortOrder },
+      select: [
+        'id',
+        'firstName',
+        'lastName',
+        'phoneNumber',
+        'role',
+        'isOnboarded',
+        'createdAt',
+      ],
+    });
+
+    return createPaginatedResponse(
+      200,
+      'Employers fetched successfully',
+      employers,
+      total,
+      page,
+      limit,
+    );
+  }
+
+  async findByUserId(id: number): Promise<ApiResponse<UserDto>> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: [
+        'id',
+        'firstName',
+        'lastName',
+        'phoneNumber',
+        'role',
+        'isOnboarded',
+        'password',
+        'createdAt',
+      ],
+    });
+
+    if (!user) {
+      throw new NotFoundException(ERROR_MESSAGES.USER_ID_NOT_FOUND(id));
+    }
+
     return returnResponse(
       200,
-      SUCCESS_MESSAGES.USER_EMAIL_FOUND(phoneNumber),
+      SUCCESS_MESSAGES.USER_FOUND(user.phoneNumber),
       user,
     );
   }
 
-  async findOne(id: number): Promise<UserDto> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
+  async findOne(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(ERROR_MESSAGES.USER_ID_NOT_FOUND(id));
+    }
+
     return user;
   }
 
-  async findByUserId(id: number): Promise<ApiResponse<UserDto>> {
-    const user = await this.userRepository.findOne({ where: { id } });
+  async findOneByNumber(phoneNumber: string): Promise<ApiResponse<UserDto>> {
+    const user = await this.userRepository.findOne({
+      where: { phoneNumber },
+      select: [
+        'id',
+        'firstName',
+        'lastName',
+        'phoneNumber',
+        'role',
+        'isOnboarded',
+        'password',
+        'createdAt',
+      ],
+    });
+
     if (!user) {
-      throw new NotFoundException(SUCCESS_MESSAGES.USER_FOUND(id));
+      throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND(phoneNumber));
     }
-    return returnResponse(200, SUCCESS_MESSAGES.USER_CREATED, user);
+
+    return returnResponse(
+      200,
+      SUCCESS_MESSAGES.USER_PHONE_FOUND(phoneNumber),
+      user,
+    );
   }
 
-  async create(createUserDto: CreateUserDto): Promise<ApiResponse<User>> {
+  async create(createUserDto: CreateUserDto): Promise<ApiResponse<UserDto>> {
     const existingUser = await this.userRepository.findOne({
       where: { phoneNumber: createUserDto.phoneNumber },
     });
@@ -66,59 +214,52 @@ export class UsersService {
       );
     }
 
-    const existingUserByName = await this.userRepository.findOne({
-      where: {
-        firstName: createUserDto.firstName,
-        lastName: createUserDto.lastName,
-      },
-    });
-    if (existingUserByName) {
-      throw new ConflictException(
-        `User with first name ${createUserDto.firstName} 
-        and last name ${createUserDto.lastName} already exists`,
-      );
-    }
-
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(
-      createUserDto.password,
-      saltRounds,
-    );
-    const newUser = this.userRepository.create({
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const user = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
     });
-    const savedUser = await this.userRepository.save(newUser);
+
+    const savedUser = await this.userRepository.save(user);
     return returnResponse(201, SUCCESS_MESSAGES.USER_CREATED, savedUser);
   }
 
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
-  ): Promise<ApiResponse<UpdateUserDto>> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`);
+  ): Promise<ApiResponse<UserDto>> {
+    const user = await this.findOne(id);
+
+    if (
+      updateUserDto.phoneNumber &&
+      updateUserDto.phoneNumber !== user.phoneNumber
+    ) {
+      const existingUser = await this.userRepository.findOne({
+        where: { phoneNumber: updateUserDto.phoneNumber },
+      });
+
+      if (existingUser) {
+        throw new ConflictException(
+          ERROR_MESSAGES.USER_ALREADY_EXISTS(updateUserDto.phoneNumber),
+        );
+      }
     }
 
-    if ('email' in updateUserDto) {
-      throw new BadRequestException('Email address cannot be updated');
-    }
     if (updateUserDto.password) {
-      const saltRounds = 10;
-      updateUserDto.password = await bcrypt.hash(
-        updateUserDto.password,
-        saltRounds,
-      );
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
-    await this.userRepository.update(id, updateUserDto);
-    const updatedUser = await this.findOne(id);
+
+    const updatedUser = await this.userRepository.save({
+      ...user,
+      ...updateUserDto,
+    });
+
     return returnResponse(200, SUCCESS_MESSAGES.USER_UPDATED, updatedUser);
   }
 
-  async delete(id: number): Promise<ApiResponse<UserDto>> {
-    const removedUser = await this.findOne(id);
-    await this.userRepository.delete(id);
-    return returnResponse(204, SUCCESS_MESSAGES.USER_DELETED, removedUser);
+  async remove(id: number): Promise<ApiResponse<UserDto>> {
+    const user = await this.findOne(id);
+    await this.userRepository.remove(user);
+    return returnResponse(200, SUCCESS_MESSAGES.USER_DELETED, user);
   }
 }

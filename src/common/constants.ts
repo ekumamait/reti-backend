@@ -13,10 +13,11 @@ export enum MentorshipSessionStatus {
 }
 
 export const ERROR_MESSAGES = {
-  USER_NOT_FOUND: (email: string) => `User with email ${email} not found`,
+  USER_NOT_FOUND: (phoneNumber: string) =>
+    `User with phone number ${phoneNumber} not found`,
   PROFILE_NOT_FOUND: (id: number) => `Profile with ID ${id} not found`,
-  USER_ALREADY_EXISTS: (email: string) =>
-    `User with email ${email} already exists`,
+  USER_ALREADY_EXISTS: (phoneNumber: string) =>
+    `User with phone number ${phoneNumber} already exists`,
   USER_ROLE_FOUND: (role: string) => `User with role ${role} not found`,
   USER_ID_NOT_FOUND: (userId: number) => `User with id ${userId} not found`,
   USERS_NOT_FOUND: () => `There are currently no users`,
@@ -41,16 +42,15 @@ export const SUCCESS_MESSAGES = {
   PROFILE_CREATED: 'Profile successfully created',
   PROFILE_UPDATED: 'Profile successfully updated',
   PROFILE_DELETED: 'Profile successfully deleted',
-  USER_FOUND: (id: number) => `User with ID ${id} fetched successfully`,
+  USER_FOUND: (phoneNumber: string) =>
+    `User with phone number ${phoneNumber} fetched successfully`,
   PROFILE_FOUND: (id: number) => `Profile with ID ${id} fetched successfully`,
-  USER_EMAIL_FOUND: (email: string) =>
-    `User with Email ${email} fetched successfully`,
+  USER_PHONE_FOUND: (phoneNumber: string) =>
+    `User with phone number ${phoneNumber} fetched successfully`,
   USERS_FOUND: 'Users fetched successfully',
   PROFILES_FOUND: 'Profiles fetched successfully',
   INSPIRATIONS_FOUND: 'Inspirations fetched successfully',
   INSPIRATION_UPDATED: 'Inspiration successfully updated',
-  INSPIRATION_DELETED: (id: number) =>
-    `Inspiration with ID ${id} deleted successfully`,
   NOTIFICATION_CREATED: 'Notification successfully created',
   INSPIRATION_CREATED: 'Inspiration successfully created',
   CONVERSATION_CREATED: 'Conversation successfully created',
@@ -63,7 +63,7 @@ export const SUCCESS_MESSAGES = {
   MESSAGES_FOUND: 'Messages fetched successfully',
   MESSAGES_MARKED_AS_READ: 'Messages successfully marked as read',
   CONVERSATIONS_FOUND: 'Conversations fetched successfully',
-  PRODUCT_DELETED: (id: string) => `Product with ID ${id} successfully deleted`,
+  PRODUCT_DELETED: (id: string) => `Product with ID ${id} deleted successfully`,
   PRODUCT_CREATED: 'Product successfully created',
   PRODUCT_UPDATED: 'Product successfully updated',
   PRODUCT_FOUND: (id: string) => `Product with ID ${id} fetched successfully`,
@@ -75,4 +75,6 @@ export const SUCCESS_MESSAGES = {
   SESSION_UPDATED: 'Session successfully updated',
   JOB_UPDATED: 'Job successfully updated',
   JOB_DELETED: 'Job successfully deleted',
+  INSPIRATION_DELETED: (id: number) =>
+    `Inspiration with ID ${id} deleted successfully`,
 };

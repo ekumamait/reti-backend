@@ -84,7 +84,7 @@ export class JobsService {
       whereClause.location = ILike(`%${query.location}%`);
     }
     if (query?.type) {
-      whereClause.type = ILike(`%${query.type}%`);
+      whereClause.jobType = query.type;
     }
 
     const [jobs, total] = await this.jobRepository.findAndCount({
@@ -120,7 +120,7 @@ export class JobsService {
       whereClause.location = ILike(`%${query.location}%`);
     }
     if (query?.type) {
-      whereClause.type = ILike(`%${query.type}%`);
+      whereClause.jobType = query.type;
     }
 
     const [jobs, total] = await this.jobRepository.findAndCount({

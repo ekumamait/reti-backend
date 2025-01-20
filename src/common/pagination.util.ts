@@ -20,14 +20,25 @@ export interface PaginatedResponse<T> {
   };
 }
 
-export const createPaginatedResponse = <T>(
+export function getPaginationParams(query: PaginationParams) {
+  const page = query.page || 1;
+  const limit = query.limit || 10;
+  const skip = (page - 1) * limit;
+  const sortBy = query.sortBy || 'createdAt';
+  const sortOrder = query.sortOrder || 'DESC';
+  const search = query.search || '';
+
+  return { page, limit, skip, search, sortBy, sortOrder };
+}
+
+export function createPaginatedResponse<T>(
   status: number,
   message: string,
   items: T[],
   total: number,
   page: number,
   limit: number,
-): PaginatedResponse<T> => {
+): PaginatedResponse<T> {
   return {
     status,
     message,
@@ -41,22 +52,4 @@ export const createPaginatedResponse = <T>(
       },
     },
   };
-};
-
-export const getPaginationParams = (query: PaginationParams) => {
-  const page = Math.max(1, query.page || 1);
-  const limit = Math.max(1, Math.min(100, query.limit || 10));
-  const skip = (page - 1) * limit;
-  const search = query.search || '';
-  const sortBy = query.sortBy || 'createdAt';
-  const sortOrder = query.sortOrder || 'DESC';
-
-  return {
-    page,
-    limit,
-    skip,
-    search,
-    sortBy,
-    sortOrder,
-  };
-};
+}

@@ -1,0 +1,32 @@
+### Login as a user to get token
+POST http://localhost:3000/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Test Users Pagination
+GET http://localhost:3000/v1/users?page=1&limit=10
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Test Products Pagination
+GET http://localhost:3000/v1/products?page=1&limit=10
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Test Notifications Pagination
+GET http://localhost:3000/v1/notifications?page=1&limit=10
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Test Mentorship Sessions Pagination
+GET http://localhost:3000/v1/mentorship-sessions?page=1&limit=10
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Test Inspirations Pagination
+GET http://localhost:3000/v1/inspirations?page=1&limit=10
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Test Mentor Inspirations Pagination
+GET http://localhost:3000/v1/inspirations/mentor?page=1&limit=10
+Authorization: Bearer YOUR_TOKEN_HERE

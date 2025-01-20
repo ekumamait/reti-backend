@@ -3,7 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToMany,
+  ManyToMany,
+  JoinTable,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -23,8 +24,12 @@ export class Inspiration {
   @ManyToOne(() => User, (user) => user.inspirations)
   mentor: User;
 
+  @ManyToMany(() => User)
+  @JoinTable({ name: 'inspiration_likes' })
+  likedBy: User[];
+
   @Column({ default: 0 })
-  likes: number;
+  likesCount: number;
 
   @CreateDateColumn()
   createdAt: Date;

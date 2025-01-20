@@ -3,7 +3,7 @@ import {
   IsEnum,
   IsOptional,
   MinLength,
-  IsEmail,
+  IsPhoneNumber,
 } from 'class-validator';
 
 export class UpdateUserDto {
@@ -14,6 +14,10 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   lastName?: string;
+
+  @IsOptional()
+  @IsPhoneNumber()
+  phoneNumber?: string;
 
   @IsOptional()
   @IsEnum(['youth', 'mentor', 'employer', 'admin'], {
