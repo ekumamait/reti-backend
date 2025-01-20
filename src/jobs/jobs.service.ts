@@ -16,6 +16,13 @@ import { ApiResponse, returnResponse } from 'src/common/response.util';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from 'src/common/constants';
 import { UserDto } from 'src/users/dto/user.dto';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { Like, ILike } from 'typeorm';
+import { JobQueryDto } from './dto/job-query.dto';
+import {
+  PaginatedResponse,
+  createPaginatedResponse,
+  getPaginationParams,
+} from 'src/common/pagination.util';
 
 @Injectable()
 export class JobsService {
@@ -65,17 +72,73 @@ export class JobsService {
     return returnResponse(201, SUCCESS_MESSAGES.JOB_CREATED, savedJob);
   }
 
-  async getAllJobs(): Promise<ApiResponse<JobDto[]>> {
-    const jobs = await this.jobRepository.find({ relations: ['employer'] });
-    return returnResponse(200, SUCCESS_MESSAGES.JOBS_FOUND, jobs);
+  async getAllJobs(query?: JobQueryDto): Promise<PaginatedResponse<JobDto>> {
+    const { page, limit, skip, search, sortBy, sortOrder } =
+      getPaginationParams(query || {});
+
+    const whereClause: any = {};
+    if (search) {
+      whereClause.title = ILike(`%${search}%`);
+    }
+    if (query?.location) {
+      whereClause.location = ILike(`%${query.location}%`);
+    }
+    if (query?.type) {
+      whereClause.type = ILike(`%${query.type}%`);
+    }
+
+    const [jobs, total] = await this.jobRepository.findAndCount({
+      where: whereClause,
+      relations: ['employer'],
+      skip,
+      take: limit,
+      order: { [sortBy]: sortOrder },
+    });
+
+    return createPaginatedResponse(
+      200,
+      SUCCESS_MESSAGES.JOBS_FOUND,
+      jobs,
+      total,
+      page,
+      limit,
+    );
   }
 
-  async getEmployerJobs(employerId: number): Promise<ApiResponse<JobDto[]>> {
-    const jobs = await this.jobRepository.find({
-      where: { employer: { id: employerId } },
+  async getEmployerJobs(
+    employerId: number,
+    query?: JobQueryDto,
+  ): Promise<PaginatedResponse<JobDto>> {
+    const { page, limit, skip, search, sortBy, sortOrder } =
+      getPaginationParams(query || {});
+
+    const whereClause: any = { employer: { id: employerId } };
+    if (search) {
+      whereClause.title = ILike(`%${search}%`);
+    }
+    if (query?.location) {
+      whereClause.location = ILike(`%${query.location}%`);
+    }
+    if (query?.type) {
+      whereClause.type = ILike(`%${query.type}%`);
+    }
+
+    const [jobs, total] = await this.jobRepository.findAndCount({
+      where: whereClause,
       relations: ['employer'],
+      skip,
+      take: limit,
+      order: { [sortBy]: sortOrder },
     });
-    return returnResponse(200, SUCCESS_MESSAGES.JOBS_FOUND, jobs);
+
+    return createPaginatedResponse(
+      200,
+      SUCCESS_MESSAGES.JOBS_FOUND,
+      jobs,
+      total,
+      page,
+      limit,
+    );
   }
 
   async getOneJob(id: number): Promise<ApiResponse<JobDto>> {

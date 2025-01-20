@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
@@ -17,6 +18,9 @@ import { ApiTags } from '@nestjs/swagger';
 import { ApiResponse } from 'src/common/response.util';
 import { JobDto } from './dto/job.dto';
 import { RequestWithUser } from 'src/common/types/types';
+import { JobQueryDto } from './dto/job-query.dto';
+import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { ParseIntPipe } from '@nestjs/common';
 
 @ApiTags('v1/jobs')
 @Controller({ path: 'jobs', version: '1' })
@@ -33,15 +37,20 @@ export class JobsController {
   }
 
   @Get()
-  async getAllJobs(): Promise<ApiResponse<JobDto[]>> {
-    return this.jobsService.getAllJobs();
+  @UseGuards(JwtAuthGuard)
+  async getAllJobs(
+    @Query() query: JobQueryDto,
+  ): Promise<ApiResponse<JobDto[]>> {
+    return this.jobsService.getAllJobs(query);
   }
 
-  @Get('employer')
+  @Get('employer/:employerId')
+  @UseGuards(JwtAuthGuard)
   async getEmployerJobs(
-    @Request() req: RequestWithUser,
+    @Param('employerId', ParseIntPipe) employerId: number,
+    @Query() query: JobQueryDto,
   ): Promise<ApiResponse<JobDto[]>> {
-    return this.jobsService.getEmployerJobs(req.user.id);
+    return this.jobsService.getEmployerJobs(employerId, query);
   }
 
   @Get(':id')
