@@ -155,40 +155,77 @@ export class InspirationsService {
   }
 
   async like(id: number, userId: number): Promise<ApiResponse<Inspiration>> {
-    const inspiration = await this.inspirationsRepository.findOne({
-      where: { id },
-      relations: ['mentor', 'likedBy'],
-    });
+    const queryRunner =
+      this.inspirationsRepository.manager.connection.createQueryRunner();
 
-    if (!inspiration) {
-      throw new NotFoundException(`Inspiration #${id} not found`);
-    }
+    try {
+      // Start transaction
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
 
-    const userIndex = inspiration.likedBy.findIndex(
-      (user) => user.id === userId,
-    );
+      console.log(`Finding inspiration with id: ${id}`);
+      const inspiration = await queryRunner.manager
+        .getRepository(Inspiration)
+        .createQueryBuilder('inspiration')
+        .leftJoinAndSelect('inspiration.mentor', 'mentor')
+        .leftJoinAndSelect('inspiration.likedBy', 'likedBy')
+        .where('inspiration.id = :id', { id })
+        .getOne();
 
-    if (userIndex !== -1) {
-      // Unlike
-      inspiration.likedBy = inspiration.likedBy.filter(
-        (user) => user.id !== userId,
+      if (!inspiration) {
+        throw new NotFoundException(`Inspiration #${id} not found`);
+      }
+
+      console.log(`Finding user with id: ${userId}`);
+      const user = await this.usersService.findOne(userId);
+      if (!user) {
+        throw new NotFoundException(`User #${userId} not found`);
+      }
+
+      const userIndex = inspiration.likedBy.findIndex(
+        (likedUser) => likedUser.id === userId,
       );
-      inspiration.likesCount--;
-    } else {
-      // Like
-      inspiration.likedBy.push({ id: userId } as any);
-      inspiration.likesCount++;
-    }
 
-    const updatedInspiration = await this.inspirationsRepository.save(
-      inspiration,
-    );
-    return returnResponse(
-      200,
-      userIndex !== -1
-        ? 'Inspiration unliked successfully'
-        : 'Inspiration liked successfully',
-      updatedInspiration,
-    );
+      if (userIndex !== -1) {
+        // Unlike - Remove user from likedBy array and decrease count
+        console.log(`User ${userId} unliking inspiration ${id}`);
+        inspiration.likedBy = inspiration.likedBy.filter(
+          (likedUser) => likedUser.id !== userId,
+        );
+        inspiration.likesCount = Math.max(0, inspiration.likesCount - 1);
+      } else {
+        // Like - Add user to likedBy array and increase count
+        console.log(`User ${userId} liking inspiration ${id}`);
+        inspiration.likedBy.push(user);
+        inspiration.likesCount++;
+      }
+
+      // Save the changes within the transaction
+      console.log('Saving changes...');
+      const updatedInspiration = await queryRunner.manager.save(
+        Inspiration,
+        inspiration,
+      );
+
+      // Commit the transaction
+      console.log('Committing transaction...');
+      await queryRunner.commitTransaction();
+
+      return returnResponse(
+        200,
+        userIndex !== -1
+          ? 'Inspiration unliked successfully'
+          : 'Inspiration liked successfully',
+        updatedInspiration,
+      );
+    } catch (error) {
+      console.error('Error in like/unlike operation:', error);
+      // Rollback transaction on error
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      // Release the queryRunner
+      await queryRunner.release();
+    }
   }
 }
