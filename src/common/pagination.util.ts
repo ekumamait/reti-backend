@@ -9,14 +9,12 @@ export interface PaginationParams {
 export interface PaginatedResponse<T> {
   status: number;
   message: string;
-  data: {
-    items: T[];
-    meta: {
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-    };
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
   };
 }
 
@@ -42,14 +40,12 @@ export function createPaginatedResponse<T>(
   return {
     status,
     message,
-    data: {
-      items,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
+    data: items,
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     },
   };
 }
