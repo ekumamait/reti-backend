@@ -1,90 +1,95 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../database/entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../common/constants';
-import { returnResponse, ApiResponse } from '../common/response.util';
-import { ProductDto } from './dto/product.dto';
-import { UserDto } from 'src/users/dto/user.dto';
+import { ProductQueryDto } from './dto/product-query.dto';
+import { ApiResponse, returnResponse } from '../common/response.util';
+import {
+  PaginatedResponse,
+  getPaginationParams,
+  createPaginatedResponse,
+} from '../common/pagination.util';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>,
+    private readonly productsRepository: Repository<Product>,
   ) {}
 
   async create(
-    user: UserDto,
     createProductDto: CreateProductDto,
-  ): Promise<ApiResponse<ProductDto>> {
-    if (user.role === 'employer') {
-      throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
-    }
-    const product = this.productRepository.create(createProductDto);
-    const savedProduct = await this.productRepository.save(product);
-    return returnResponse(201, SUCCESS_MESSAGES.PRODUCT_CREATED, savedProduct);
+  ): Promise<ApiResponse<Product>> {
+    const product = this.productsRepository.create(createProductDto);
+    const savedProduct = await this.productsRepository.save(product);
+    return returnResponse(201, 'Product created successfully', savedProduct);
   }
 
-  async findAll(): Promise<ApiResponse<ProductDto[]>> {
-    const products = await this.productRepository.find({
-      where: { isActive: true },
-      order: { createdAt: 'DESC' },
+  async findAll(query?: ProductQueryDto): Promise<PaginatedResponse<Product>> {
+    const { page, limit, skip, sortBy, sortOrder } = getPaginationParams(
+      query || {},
+    );
+
+    const [products, total] = await this.productsRepository.findAndCount({
+      skip,
+      take: limit,
+      order: { [sortBy]: sortOrder },
     });
-    return returnResponse(200, SUCCESS_MESSAGES.PRODUCTS_FOUND, products);
+
+    return createPaginatedResponse(
+      200,
+      'Products fetched successfully',
+      products,
+      total,
+      page,
+      limit,
+    );
   }
 
-  async findOne(id: string): Promise<ApiResponse<ProductDto>> {
-    const product = await this.productRepository.findOne({
-      where: { id, isActive: true },
+  async findOne(id: string): Promise<ApiResponse<Product>> {
+    const product = await this.productsRepository.findOne({
+      where: { id },
     });
+
     if (!product) {
-      throw new NotFoundException(ERROR_MESSAGES.PRODUCT_NOT_FOUND(id));
+      throw new NotFoundException(`Product #${id} not found`);
     }
-    return returnResponse(200, SUCCESS_MESSAGES.PRODUCT_FOUND(id), product);
+
+    return returnResponse(200, 'Product fetched successfully', product);
   }
 
   async update(
-    user: UserDto,
     id: string,
     updateProductDto: UpdateProductDto,
-  ): Promise<ApiResponse<ProductDto>> {
-    if (user.role === 'employer') {
-      throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
-    }
-    const product = await this.findOne(id);
-    Object.assign(product.data, updateProductDto);
-    const updatedProduct = await this.productRepository.save(product.data);
-    return returnResponse(
-      200,
-      SUCCESS_MESSAGES.PRODUCT_UPDATED,
-      updatedProduct,
-    );
-  }
-
-  async delete(user: UserDto, id: string): Promise<ApiResponse<ProductDto>> {
-    if (user.role === 'employer') {
-      throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
-    }
-    const product = await this.productRepository.findOne({
-      where: { id, isActive: true },
+  ): Promise<ApiResponse<Product>> {
+    const product = await this.productsRepository.findOne({
+      where: { id },
     });
 
     if (!product) {
-      throw new NotFoundException(ERROR_MESSAGES.PRODUCT_NOT_FOUND(id));
+      throw new NotFoundException(`Product #${id} not found`);
     }
-    product.isActive = false;
-    const deletedProduct = await this.productRepository.remove(product);
-    return returnResponse(
-      200,
-      SUCCESS_MESSAGES.PRODUCT_DELETED(id),
-      deletedProduct,
-    );
+
+    const updatedProduct = await this.productsRepository.save({
+      ...product,
+      ...updateProductDto,
+    });
+
+    return returnResponse(200, 'Product updated successfully', updatedProduct);
+  }
+
+  async remove(id: string): Promise<ApiResponse<Product>> {
+    const product = await this.productsRepository.findOne({
+      where: { id },
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product #${id} not found`);
+    }
+
+    await this.productsRepository.remove(product);
+    return returnResponse(200, 'Product deleted successfully', product);
   }
 }

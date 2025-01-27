@@ -1,91 +1,85 @@
 import {
   Controller,
-  Post,
   Get,
-  Patch,
-  Delete,
+  Post,
   Body,
+  Patch,
   Param,
-  Request,
+  Delete,
   UseGuards,
-  Req,
+  Request,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { MentorshipSessionsService } from './mentorship-sessions.service';
-import { MentorshipSessionDto } from './dto/mentorship-session.dto';
 import { CreateMentorshipSessionDto } from './dto/create-mentorship-session.dto';
 import { UpdateMentorshipSessionDto } from './dto/update-mentorship-session.dto';
-import { RolesGuard } from '../authentication/guards/roles.guard';
-import { Roles } from '../authentication/decorators/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiResponse } from 'src/common/response.util';
-import { RequestWithUser } from 'src/common/types/types';
+import { ApiTags } from '@nestjs/swagger';
+import { MentorshipSessionQueryDto } from './dto/mentorship-session-query.dto';
+import { PaginatedResponse } from '../common/pagination.util';
+import { MentorshipSession } from '../database/entities/mentorship-session.entity';
+import { RequestWithUser } from '../common/types/types';
+import { ApiResponse } from '../common/response.util';
 
 @ApiTags('v1/mentorship-sessions')
 @Controller({ path: 'mentorship-sessions', version: '1' })
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(AuthGuard('jwt'))
 export class MentorshipSessionsController {
   constructor(
     private readonly mentorshipSessionsService: MentorshipSessionsService,
   ) {}
 
   @Post()
-  @Roles('youth')
   async bookSession(
     @Body() createDto: CreateMentorshipSessionDto,
     @Request() req: RequestWithUser,
-  ): Promise<ApiResponse<MentorshipSessionDto>> {
+  ): Promise<ApiResponse<MentorshipSession>> {
     return this.mentorshipSessionsService.bookSession(req.user.id, createDto);
   }
 
-  @Get('admin')
-  @Roles('admin')
-  async getAllSessions(): Promise<ApiResponse<MentorshipSessionDto[]>> {
-    return this.mentorshipSessionsService.getAllSessions();
+  @Get()
+  async findAll(
+    @Query() query: MentorshipSessionQueryDto,
+  ): Promise<PaginatedResponse<MentorshipSession>> {
+    return this.mentorshipSessionsService.findAll(query);
   }
 
   @Get('mentor')
-  @Roles('mentor')
   async getMentorSessions(
     @Request() req: RequestWithUser,
-  ): Promise<ApiResponse<MentorshipSessionDto[]>> {
-    return this.mentorshipSessionsService.getMentorSessions(req.user.id);
+    @Query() query: MentorshipSessionQueryDto,
+  ): Promise<PaginatedResponse<MentorshipSession>> {
+    return this.mentorshipSessionsService.findMentorSessions(
+      req.user.id,
+      query,
+    );
   }
 
   @Get('youth')
-  @Roles('youth')
   async getYouthSessions(
     @Request() req: RequestWithUser,
-  ): Promise<ApiResponse<MentorshipSessionDto[]>> {
-    return this.mentorshipSessionsService.getYouthSessions(req.user.id);
+    @Query() query: MentorshipSessionQueryDto,
+  ): Promise<PaginatedResponse<MentorshipSession>> {
+    return this.mentorshipSessionsService.findYouthSessions(req.user.id, query);
   }
 
   @Get(':id')
   async getOneSession(
     @Param('id') id: number,
-  ): Promise<ApiResponse<MentorshipSessionDto>> {
+  ): Promise<ApiResponse<MentorshipSession>> {
     return this.mentorshipSessionsService.getOneSession(id);
   }
 
   @Patch(':id')
-  @Roles('mentor')
   async updateSession(
     @Param('id') sessionId: number,
     @Body() updateDto: UpdateMentorshipSessionDto,
     @Request() req: RequestWithUser,
-  ): Promise<ApiResponse<MentorshipSessionDto>> {
+  ): Promise<ApiResponse<MentorshipSession>> {
     return this.mentorshipSessionsService.updateSession(
       req.user,
       sessionId,
       updateDto,
     );
-  }
-
-  @Delete(':id')
-  async cancelSession(
-    @Param('id') session: any,
-    @Request() req: RequestWithUser,
-  ) {
-    return this.mentorshipSessionsService.cancelSession(session, req.user);
   }
 }

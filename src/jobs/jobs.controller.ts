@@ -8,15 +8,19 @@ import {
   Delete,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { JobsService } from './jobs.service';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiResponse } from 'src/common/response.util';
 import { JobDto } from './dto/job.dto';
 import { RequestWithUser } from 'src/common/types/types';
+import { JobQueryDto } from './dto/job-query.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { ParseIntPipe } from '@nestjs/common';
+import { PaginatedResponse } from 'src/common/pagination.util';
 
 @ApiTags('v1/jobs')
 @Controller({ path: 'jobs', version: '1' })
@@ -33,15 +37,20 @@ export class JobsController {
   }
 
   @Get()
-  async getAllJobs(): Promise<ApiResponse<JobDto[]>> {
-    return this.jobsService.getAllJobs();
+  @UseGuards(AuthGuard('jwt'))
+  async getAllJobs(
+    @Query() query: JobQueryDto,
+  ): Promise<PaginatedResponse<JobDto>> {
+    return this.jobsService.getAllJobs(query);
   }
 
-  @Get('employer')
+  @Get('employer/:employerId')
+  @UseGuards(AuthGuard('jwt'))
   async getEmployerJobs(
-    @Request() req: RequestWithUser,
-  ): Promise<ApiResponse<JobDto[]>> {
-    return this.jobsService.getEmployerJobs(req.user.id);
+    @Param('employerId', ParseIntPipe) employerId: number,
+    @Query() query: JobQueryDto,
+  ): Promise<PaginatedResponse<JobDto>> {
+    return this.jobsService.getEmployerJobs(employerId, query);
   }
 
   @Get(':id')

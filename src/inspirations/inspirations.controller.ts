@@ -3,84 +3,85 @@ import {
   Get,
   Post,
   Body,
+  Patch,
   Param,
   Delete,
   UseGuards,
+  Request,
   Query,
   Put,
-  Request,
-  Patch,
 } from '@nestjs/common';
 import { InspirationsService } from './inspirations.service';
 import { CreateInspirationDto } from './dto/create-inspiration.dto';
 import { UpdateInspirationDto } from './dto/update-inspiration.dto';
-import { RolesGuard } from '../authentication/guards/roles.guard';
-import { Roles } from '../authentication/decorators/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
-import { InspirationDto } from './dto/inspiration.dto';
-import { ApiResponse } from 'src/common/response.util';
-import { RequestWithUser } from 'src/common/types/types';
+import { InspirationQueryDto } from './dto/inspiration-query.dto';
+import { PaginatedResponse } from '../common/pagination.util';
+import { Inspiration } from '../database/entities/inspiration.entity';
+import { RequestWithUser } from '../common/types/types';
+import { ApiResponse } from '../common/response.util';
 
 @ApiTags('v1/inspirations')
 @Controller({ path: 'inspirations', version: '1' })
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(AuthGuard('jwt'))
 export class InspirationsController {
   constructor(private readonly inspirationsService: InspirationsService) {}
 
   @Post()
-  @Roles('mentor')
-  async createInspiration(
-    @Body() createDto: CreateInspirationDto,
+  async create(
+    @Body() createInspirationDto: CreateInspirationDto,
     @Request() req: RequestWithUser,
-  ): Promise<ApiResponse<InspirationDto>> {
-    return this.inspirationsService.createInspiration(req.user.id, createDto);
+  ): Promise<ApiResponse<Inspiration>> {
+    return this.inspirationsService.create(req.user.id, createInspirationDto);
   }
 
   @Get()
-  async getAllInspirations(): Promise<ApiResponse<InspirationDto[]>> {
-    return this.inspirationsService.getAllInspirations();
+  async findAll(
+    @Query() query: InspirationQueryDto,
+  ): Promise<PaginatedResponse<Inspiration>> {
+    return this.inspirationsService.findAll(query);
   }
 
   @Get('mentor')
-  async getMentorInspirations(
+  async findMentorInspirations(
     @Request() req: RequestWithUser,
-  ): Promise<ApiResponse<InspirationDto[]>> {
-    return this.inspirationsService.getMentorInspirations(req.user.id);
+    @Query() query: InspirationQueryDto,
+  ): Promise<PaginatedResponse<Inspiration>> {
+    return this.inspirationsService.findMentorInspirations(req.user.id, query);
   }
 
   @Get(':id')
-  async getOneInspiration(
-    @Param('id') id: number,
-  ): Promise<ApiResponse<InspirationDto>> {
-    return this.inspirationsService.getOneInspiration(id);
+  async findOne(@Param('id') id: number): Promise<ApiResponse<Inspiration>> {
+    return this.inspirationsService.findOne(id);
   }
 
   @Patch(':id')
-  async updateInspiration(
+  async update(
     @Param('id') id: number,
     @Body() updateInspirationDto: UpdateInspirationDto,
     @Request() req: RequestWithUser,
-  ): Promise<ApiResponse<InspirationDto>> {
-    return this.inspirationsService.updateInspiration(
-      req.user,
+  ): Promise<ApiResponse<Inspiration>> {
+    return this.inspirationsService.update(
+      req.user.id,
       id,
       updateInspirationDto,
     );
   }
 
   @Delete(':id')
-  async deleteInspiration(
-    @Param('id') inspirationId: number,
+  async remove(
+    @Param('id') id: number,
     @Request() req: RequestWithUser,
-  ): Promise<ApiResponse<InspirationDto>> {
-    return this.inspirationsService.deleteInspiration(req.user, inspirationId);
+  ): Promise<ApiResponse<Inspiration>> {
+    return this.inspirationsService.remove(req.user.id, id);
   }
 
-  //upcoming refactor
   @Put(':id/like')
-  @Roles('youth')
-  like(@Request() req, @Param('id') id: number, likeDto: any) {
-    return this.inspirationsService.likeInspiration(id, req.user.id, likeDto);
+  async like(
+    @Param('id') id: number,
+    @Request() req: RequestWithUser,
+  ): Promise<ApiResponse<Inspiration>> {
+    return this.inspirationsService.like(id, req.user.id);
   }
 }

@@ -1,6 +1,6 @@
-import { Request } from '@nestjs/common';
-import { UserDto } from '../../users/dto/user.dto';
+import { Request } from 'express';
+import { User } from '../../database/entities/user.entity';
 
-export type RequestWithUser = Request & {
-  user: UserDto;
-};
+export interface RequestWithUser extends Request {
+  user: User;
+}

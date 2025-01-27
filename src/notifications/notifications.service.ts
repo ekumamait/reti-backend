@@ -3,52 +3,60 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from '../database/entities/notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import { ApiResponse, returnResponse } from 'src/common/response.util';
-import { User } from 'src/database/entities/user.entity';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from 'src/common/constants';
+import { returnResponse, ApiResponse } from '../common/response.util';
+import { NotificationQueryDto } from './dto/notification-query.dto';
+import {
+  PaginatedResponse,
+  getPaginationParams,
+  createPaginatedResponse,
+} from '../common/pagination.util';
 
 @Injectable()
 export class NotificationsService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
     @InjectRepository(Notification)
-    private notificationsRepository: Repository<Notification>,
+    private readonly notificationsRepository: Repository<Notification>,
   ) {}
 
   async create(
     createNotificationDto: CreateNotificationDto,
   ): Promise<ApiResponse<Notification>> {
-    const user = await this.userRepository.findOne({
-      where: { id: createNotificationDto.userId },
-    });
-    if (!user) {
-      throw new NotFoundException(
-        ERROR_MESSAGES.USER_ID_NOT_FOUND(createNotificationDto.userId),
-      );
-    }
     const notification = this.notificationsRepository.create(
       createNotificationDto,
     );
-
     const savedNotification = await this.notificationsRepository.save(
       notification,
     );
     return returnResponse(
       201,
-      SUCCESS_MESSAGES.NOTIFICATION_CREATED,
+      'Notification created successfully',
       savedNotification,
     );
   }
 
-  async findAll(userId: number): Promise<ApiResponse<Notification[]>> {
-    const notifications = await this.notificationsRepository.find({
-      where: { userId },
-    });
-    return returnResponse(
+  async findAll(
+    userId: number,
+    query?: NotificationQueryDto,
+  ): Promise<PaginatedResponse<Notification>> {
+    const { page, limit, skip, sortBy, sortOrder } = getPaginationParams(
+      query || {},
+    );
+
+    const [notifications, total] =
+      await this.notificationsRepository.findAndCount({
+        where: { userId },
+        skip,
+        take: limit,
+        order: { [sortBy]: sortOrder },
+      });
+
+    return createPaginatedResponse(
       200,
       'Notifications fetched successfully',
       notifications,
+      total,
+      page,
+      limit,
     );
   }
 
@@ -59,12 +67,14 @@ export class NotificationsService {
     const notification = await this.notificationsRepository.findOne({
       where: { id, userId },
     });
+
     if (!notification) {
-      throw new NotFoundException(`Notification #${id} not found`);
+      throw new NotFoundException('Notification not found');
     }
+
     return returnResponse(
       200,
-      `Notification #${id} fetched successfully`,
+      'Notification fetched successfully',
       notification,
     );
   }
@@ -73,39 +83,56 @@ export class NotificationsService {
     id: number,
     userId: number,
   ): Promise<ApiResponse<Notification>> {
-    const notification = await this.findOne(id, userId);
-    const updatedNotification = await this.notificationsRepository.save({
-      ...notification.data,
-      isRead: true,
+    const notification = await this.notificationsRepository.findOne({
+      where: { id, userId },
     });
+
+    if (!notification) {
+      throw new NotFoundException('Notification not found');
+    }
+
+    notification.isRead = true;
+    const updatedNotification = await this.notificationsRepository.save(
+      notification,
+    );
     return returnResponse(
       200,
-      `Notification #${id} marked as read`,
+      'Notification marked as read',
       updatedNotification,
     );
   }
 
   async delete(id: number, userId: number): Promise<ApiResponse<Notification>> {
-    const notification = await this.findOne(id, userId);
-    const deletedNotification = await this.notificationsRepository.remove(
-      notification.data,
-    );
+    const notification = await this.notificationsRepository.findOne({
+      where: { id, userId },
+    });
+
+    if (!notification) {
+      throw new NotFoundException('Notification not found');
+    }
+
+    await this.notificationsRepository.remove(notification);
     return returnResponse(
       200,
-      `Notification #${id} deleted successfully`,
-      deletedNotification,
+      'Notification deleted successfully',
+      notification,
     );
   }
 
   async deleteAll(userId: number): Promise<ApiResponse<Notification[]>> {
-    const notifications = await this.findAll(userId);
-    const deletedNotifications = await this.notificationsRepository.remove(
-      notifications.data,
-    );
+    const notifications = await this.notificationsRepository.find({
+      where: { userId },
+    });
+
+    if (!notifications.length) {
+      throw new NotFoundException('No notifications found');
+    }
+
+    await this.notificationsRepository.remove(notifications);
     return returnResponse(
       200,
       'All notifications deleted successfully',
-      deletedNotifications,
+      notifications,
     );
   }
 }

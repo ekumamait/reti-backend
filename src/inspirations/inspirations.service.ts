@@ -1,186 +1,193 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  UnauthorizedException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Inspiration } from '../database/entities/inspiration.entity';
 import { UsersService } from '../users/users.service';
 import { CreateInspirationDto } from './dto/create-inspiration.dto';
-import { InspirationDto } from './dto/inspiration.dto';
 import { UpdateInspirationDto } from './dto/update-inspiration.dto';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from 'src/common/constants';
-import { ApiResponse, returnResponse } from 'src/common/response.util';
-import { UserDto } from 'src/users/dto/user.dto';
+import { ApiResponse, returnResponse } from '../common/response.util';
+import { InspirationQueryDto } from './dto/inspiration-query.dto';
+import {
+  PaginatedResponse,
+  getPaginationParams,
+  createPaginatedResponse,
+} from '../common/pagination.util';
 
 @Injectable()
 export class InspirationsService {
   constructor(
     @InjectRepository(Inspiration)
-    private inspirationsRepository: Repository<Inspiration>,
-    private usersService: UsersService,
+    private readonly inspirationsRepository: Repository<Inspiration>,
+    private readonly usersService: UsersService,
   ) {}
 
-  async createInspiration(
+  async create(
     mentorId: number,
     createDto: CreateInspirationDto,
-  ): Promise<ApiResponse<InspirationDto>> {
+  ): Promise<ApiResponse<Inspiration>> {
     const mentor = await this.usersService.findOne(mentorId);
-
     if (!mentor) {
-      throw new NotFoundException('Mentor not found');
-    }
-
-    const existingInspiration = await this.inspirationsRepository.findOne({
-      where: {
-        title: createDto.title,
-        mentor: { id: mentor.id },
-      },
-    });
-
-    if (existingInspiration) {
-      throw new ConflictException(
-        'An inspiration with the same title already exists for this mentor.',
-      );
+      throw new NotFoundException(`Mentor #${mentorId} not found`);
     }
 
     const inspiration = this.inspirationsRepository.create({
       ...createDto,
-      mentor: mentor,
+      mentor: { id: mentorId },
+      likedBy: [],
+      likesCount: 0,
     });
-
     const savedInspiration = await this.inspirationsRepository.save(
       inspiration,
     );
     return returnResponse(
       201,
-      SUCCESS_MESSAGES.INSPIRATION_CREATED,
+      'Inspiration created successfully',
       savedInspiration,
     );
   }
 
-  async getAllInspirations(): Promise<ApiResponse<InspirationDto[]>> {
-    const inspirations = await this.inspirationsRepository.find({
-      relations: ['mentor'],
-    });
-    return returnResponse(
+  async findAll(
+    query?: InspirationQueryDto,
+  ): Promise<PaginatedResponse<Inspiration>> {
+    const { page, limit, skip, sortBy, sortOrder } = getPaginationParams(
+      query || {},
+    );
+
+    const [inspirations, total] =
+      await this.inspirationsRepository.findAndCount({
+        relations: ['mentor', 'likedBy'],
+        skip,
+        take: limit,
+        order: { [sortBy]: sortOrder },
+      });
+
+    return createPaginatedResponse(
       200,
-      SUCCESS_MESSAGES.INSPIRATIONS_FOUND,
+      'Inspirations fetched successfully',
       inspirations,
+      total,
+      page,
+      limit,
     );
   }
 
-  async getMentorInspirations(
+  async findMentorInspirations(
     mentorId: number,
-  ): Promise<ApiResponse<InspirationDto[]>> {
-    const inspirations = await this.inspirationsRepository.find({
-      where: { mentor: { id: mentorId } },
-      relations: ['mentor'],
-    });
-    return returnResponse(
+    query?: InspirationQueryDto,
+  ): Promise<PaginatedResponse<Inspiration>> {
+    const { page, limit, skip, sortBy, sortOrder } = getPaginationParams(
+      query || {},
+    );
+
+    const [inspirations, total] =
+      await this.inspirationsRepository.findAndCount({
+        where: { mentor: { id: mentorId } },
+        relations: ['mentor', 'likedBy'],
+        skip,
+        take: limit,
+        order: { [sortBy]: sortOrder },
+      });
+
+    return createPaginatedResponse(
       200,
-      SUCCESS_MESSAGES.INSPIRATIONS_FOUND,
+      'Mentor inspirations fetched successfully',
       inspirations,
+      total,
+      page,
+      limit,
     );
   }
 
-  async getOneInspiration(id: number): Promise<ApiResponse<InspirationDto>> {
+  async findOne(id: number): Promise<ApiResponse<Inspiration>> {
     const inspiration = await this.inspirationsRepository.findOne({
-      where: { id: id },
-      relations: ['mentor'],
+      where: { id },
+      relations: ['mentor', 'likedBy'],
     });
+
     if (!inspiration) {
-      throw new NotFoundException(`Inspiration with ID ${id} not found`);
+      throw new NotFoundException(`Inspiration #${id} not found`);
     }
-    return returnResponse(
-      200,
-      SUCCESS_MESSAGES.INSPIRATIONS_FOUND,
-      inspiration,
-    );
+
+    return returnResponse(200, 'Inspiration fetched successfully', inspiration);
   }
 
-  async updateInspiration(
-    mentor: UserDto,
-    inspirationId: number,
+  async update(
+    mentorId: number,
+    id: number,
     updateDto: UpdateInspirationDto,
-  ): Promise<ApiResponse<InspirationDto>> {
-    if (mentor.role !== 'mentor') {
-      throw new ForbiddenException('Only mentor can update jobs');
-    }
-
+  ): Promise<ApiResponse<Inspiration>> {
     const inspiration = await this.inspirationsRepository.findOne({
-      where: { id: inspirationId, mentor: { id: mentor.id } },
-      relations: ['mentor'],
+      where: { id, mentor: { id: mentorId } },
+      relations: ['mentor', 'likedBy'],
     });
 
     if (!inspiration) {
-      throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
+      throw new NotFoundException(`Inspiration #${id} not found`);
     }
-    Object.assign(inspiration, updateDto);
-    const updatedInspiration = await this.inspirationsRepository.save(
-      inspiration,
-    );
+
+    const updatedInspiration = await this.inspirationsRepository.save({
+      ...inspiration,
+      ...updateDto,
+    });
 
     return returnResponse(
       200,
-      SUCCESS_MESSAGES.INSPIRATION_UPDATED,
+      'Inspiration updated successfully',
       updatedInspiration,
     );
   }
 
-  async deleteInspiration(
-    mentor: UserDto,
-    inspirationId: number,
-  ): Promise<ApiResponse<InspirationDto>> {
-    if (mentor.role !== 'mentor') {
-      throw new ForbiddenException('Only mentor can delete jobs');
-    }
+  async remove(
+    mentorId: number,
+    id: number,
+  ): Promise<ApiResponse<Inspiration>> {
     const inspiration = await this.inspirationsRepository.findOne({
-      where: {
-        id: inspirationId,
-        mentor: { id: mentor.id },
-      },
+      where: { id, mentor: { id: mentorId } },
+      relations: ['mentor', 'likedBy'],
     });
 
     if (!inspiration) {
-      throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
+      throw new NotFoundException(`Inspiration #${id} not found`);
     }
 
     await this.inspirationsRepository.remove(inspiration);
-    return returnResponse(
-      200,
-      SUCCESS_MESSAGES.INSPIRATION_DELETED(inspiration.id),
-    );
+    return returnResponse(200, 'Inspiration deleted successfully', inspiration);
   }
 
-  async likeInspiration(
-    inspirationId: number,
-    userId: number,
-    likeDto: UpdateInspirationDto,
-  ) {
-    const user = await this.usersService.findOne(userId);
-
-    if (user.role !== 'youth') {
-      throw new UnauthorizedException('Only youth can like inspirations');
-    }
-
+  async like(id: number, userId: number): Promise<ApiResponse<Inspiration>> {
     const inspiration = await this.inspirationsRepository.findOne({
-      where: { id: inspirationId },
+      where: { id },
+      relations: ['mentor', 'likedBy'],
     });
 
     if (!inspiration) {
-      throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
+      throw new NotFoundException(`Inspiration #${id} not found`);
     }
-    Object.assign(inspiration, likeDto);
+
+    const userIndex = inspiration.likedBy.findIndex(
+      (user) => user.id === userId,
+    );
+
+    if (userIndex !== -1) {
+      // Unlike
+      inspiration.likedBy = inspiration.likedBy.filter(
+        (user) => user.id !== userId,
+      );
+      inspiration.likesCount--;
+    } else {
+      // Like
+      inspiration.likedBy.push({ id: userId } as any);
+      inspiration.likesCount++;
+    }
+
     const updatedInspiration = await this.inspirationsRepository.save(
       inspiration,
     );
     return returnResponse(
       200,
-      SUCCESS_MESSAGES.INSPIRATION_UPDATED,
+      userIndex !== -1
+        ? 'Inspiration unliked successfully'
+        : 'Inspiration liked successfully',
       updatedInspiration,
     );
   }
