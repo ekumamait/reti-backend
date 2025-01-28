@@ -155,40 +155,60 @@ export class InspirationsService {
   }
 
   async like(id: number, userId: number): Promise<ApiResponse<Inspiration>> {
-    const inspiration = await this.inspirationsRepository.findOne({
-      where: { id },
-      relations: ['mentor', 'likedBy'],
-    });
+    const queryRunner =
+      this.inspirationsRepository.manager.connection.createQueryRunner();
 
-    if (!inspiration) {
-      throw new NotFoundException(`Inspiration #${id} not found`);
-    }
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const inspiration = await queryRunner.manager
+        .getRepository(Inspiration)
+        .createQueryBuilder('inspiration')
+        .leftJoinAndSelect('inspiration.mentor', 'mentor')
+        .leftJoinAndSelect('inspiration.likedBy', 'likedBy')
+        .where('inspiration.id = :id', { id })
+        .getOne();
 
-    const userIndex = inspiration.likedBy.findIndex(
-      (user) => user.id === userId,
-    );
+      if (!inspiration) {
+        throw new NotFoundException(`Inspiration #${id} not found`);
+      }
+      const user = await this.usersService.findOne(userId);
+      if (!user) {
+        throw new NotFoundException(`User #${userId} not found`);
+      }
 
-    if (userIndex !== -1) {
-      // Unlike
-      inspiration.likedBy = inspiration.likedBy.filter(
-        (user) => user.id !== userId,
+      const userIndex = inspiration.likedBy.findIndex(
+        (likedUser) => likedUser.id === userId,
       );
-      inspiration.likesCount--;
-    } else {
-      // Like
-      inspiration.likedBy.push({ id: userId } as any);
-      inspiration.likesCount++;
-    }
 
-    const updatedInspiration = await this.inspirationsRepository.save(
-      inspiration,
-    );
-    return returnResponse(
-      200,
-      userIndex !== -1
-        ? 'Inspiration unliked successfully'
-        : 'Inspiration liked successfully',
-      updatedInspiration,
-    );
+      if (userIndex !== -1) {
+        inspiration.likedBy = inspiration.likedBy.filter(
+          (likedUser) => likedUser.id !== userId,
+        );
+        inspiration.likesCount = Math.max(0, inspiration.likesCount - 1);
+      } else {
+        inspiration.likedBy.push(user);
+        inspiration.likesCount++;
+      }
+
+      const updatedInspiration = await queryRunner.manager.save(
+        Inspiration,
+        inspiration,
+      );
+      await queryRunner.commitTransaction();
+
+      return returnResponse(
+        200,
+        userIndex !== -1
+          ? 'Inspiration unliked successfully'
+          : 'Inspiration liked successfully',
+        updatedInspiration,
+      );
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
