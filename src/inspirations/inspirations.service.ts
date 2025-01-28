@@ -159,11 +159,8 @@ export class InspirationsService {
       this.inspirationsRepository.manager.connection.createQueryRunner();
 
     try {
-      // Start transaction
       await queryRunner.connect();
       await queryRunner.startTransaction();
-
-      console.log(`Finding inspiration with id: ${id}`);
       const inspiration = await queryRunner.manager
         .getRepository(Inspiration)
         .createQueryBuilder('inspiration')
@@ -175,8 +172,6 @@ export class InspirationsService {
       if (!inspiration) {
         throw new NotFoundException(`Inspiration #${id} not found`);
       }
-
-      console.log(`Finding user with id: ${userId}`);
       const user = await this.usersService.findOne(userId);
       if (!user) {
         throw new NotFoundException(`User #${userId} not found`);
@@ -187,28 +182,19 @@ export class InspirationsService {
       );
 
       if (userIndex !== -1) {
-        // Unlike - Remove user from likedBy array and decrease count
-        console.log(`User ${userId} unliking inspiration ${id}`);
         inspiration.likedBy = inspiration.likedBy.filter(
           (likedUser) => likedUser.id !== userId,
         );
         inspiration.likesCount = Math.max(0, inspiration.likesCount - 1);
       } else {
-        // Like - Add user to likedBy array and increase count
-        console.log(`User ${userId} liking inspiration ${id}`);
         inspiration.likedBy.push(user);
         inspiration.likesCount++;
       }
 
-      // Save the changes within the transaction
-      console.log('Saving changes...');
       const updatedInspiration = await queryRunner.manager.save(
         Inspiration,
         inspiration,
       );
-
-      // Commit the transaction
-      console.log('Committing transaction...');
       await queryRunner.commitTransaction();
 
       return returnResponse(
@@ -219,12 +205,9 @@ export class InspirationsService {
         updatedInspiration,
       );
     } catch (error) {
-      console.error('Error in like/unlike operation:', error);
-      // Rollback transaction on error
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
-      // Release the queryRunner
       await queryRunner.release();
     }
   }
