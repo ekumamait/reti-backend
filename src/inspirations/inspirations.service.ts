@@ -155,40 +155,58 @@ export class InspirationsService {
   }
 
   async like(id: number, userId: number): Promise<ApiResponse<Inspiration>> {
-    const inspiration = await this.inspirationsRepository.findOne({
-      where: { id },
-      relations: ['mentor', 'likedBy'],
-    });
+    // Use a transaction for atomicity
+    return this.inspirationsRepository.manager.transaction(
+      async (transactionalEntityManager) => {
+        // Get inspiration with lock
+        const inspiration = await transactionalEntityManager
+          .createQueryBuilder(Inspiration, 'inspiration')
+          .setLock('pessimistic_write')
+          .leftJoinAndSelect('inspiration.mentor', 'mentor')
+          .leftJoinAndSelect('inspiration.likedBy', 'likedBy')
+          .where('inspiration.id = :id', { id })
+          .getOne();
 
-    if (!inspiration) {
-      throw new NotFoundException(`Inspiration #${id} not found`);
-    }
+        if (!inspiration) {
+          throw new NotFoundException(`Inspiration #${id} not found`);
+        }
 
-    const userIndex = inspiration.likedBy.findIndex(
-      (user) => user.id === userId,
-    );
+        const user = await this.usersService.findOne(userId);
+        if (!user) {
+          throw new NotFoundException(`User #${userId} not found`);
+        }
 
-    if (userIndex !== -1) {
-      // Unlike
-      inspiration.likedBy = inspiration.likedBy.filter(
-        (user) => user.id !== userId,
-      );
-      inspiration.likesCount--;
-    } else {
-      // Like
-      inspiration.likedBy.push({ id: userId } as any);
-      inspiration.likesCount++;
-    }
+        // Check if user has already liked
+        const hasLiked = inspiration.likedBy.some(
+          (likedUser) => likedUser.id === userId,
+        );
 
-    const updatedInspiration = await this.inspirationsRepository.save(
-      inspiration,
-    );
-    return returnResponse(
-      200,
-      userIndex !== -1
-        ? 'Inspiration unliked successfully'
-        : 'Inspiration liked successfully',
-      updatedInspiration,
+        if (hasLiked) {
+          // Unlike - Remove user and decrease count
+          inspiration.likedBy = inspiration.likedBy.filter(
+            (u) => u.id !== userId,
+          );
+          inspiration.likesCount = Math.max(0, inspiration.likesCount - 1);
+        } else {
+          // Like - Add user and increase count
+          inspiration.likedBy.push(user);
+          inspiration.likesCount = inspiration.likedBy.length; // Ensure count matches actual likes
+        }
+
+        // Save changes
+        const updatedInspiration = await transactionalEntityManager.save(
+          Inspiration,
+          inspiration,
+        );
+
+        return returnResponse(
+          200,
+          hasLiked
+            ? 'Inspiration unliked successfully'
+            : 'Inspiration liked successfully',
+          updatedInspiration,
+        );
+      },
     );
   }
 }
