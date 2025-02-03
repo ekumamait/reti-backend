@@ -18,8 +18,14 @@ async function bootstrap() {
   );
 
   // Enable CORS
+  const allowedOrigins = [
+    process.env.LOCAL_FRONTEND_URL,
+    process.env.FRONTEND_URL,
+    process.env.LOCAL_FRONTEND_URL_ALT,
+  ].filter(Boolean);
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || process.env.LOCAL_FRONTEND_URL,
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
