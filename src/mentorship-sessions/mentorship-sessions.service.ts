@@ -12,12 +12,16 @@ import {
   getPaginationParams,
   createPaginatedResponse,
 } from '../common/pagination.util';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class MentorshipSessionsService {
   constructor(
     @InjectRepository(MentorshipSession)
     private readonly mentorshipSessionRepository: Repository<MentorshipSession>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    private notificationService: NotificationsService,
   ) {}
 
   async bookSession(
@@ -29,6 +33,25 @@ export class MentorshipSessionsService {
       youth: { id: userId },
       mentor: { id: createDto.mentorId },
     });
+
+    if (session) {
+      const [youth, mentor] = await Promise.all([
+        this.userRepository.findOneBy({ id: userId }),
+        this.userRepository.findOneBy({ id: createDto.mentorId }),
+      ]);
+
+      await this.notificationService.create({
+        title: 'New Mentorship Session Booked',
+        userId: createDto.mentorId,
+        message: `${youth?.firstName} has booked a session with you`,
+      });
+
+      await this.notificationService.create({
+        title: 'Session Booking Confirmation',
+        userId: userId,
+        message: `Your session with ${mentor?.firstName} has been booked successfully`,
+      });
+    }
     const savedSession = await this.mentorshipSessionRepository.save(session);
     return returnResponse(201, 'Session booked successfully', savedSession);
   }
@@ -142,6 +165,20 @@ export class MentorshipSessionsService {
     // Only allow youth or mentor to update their own sessions
     if (session.youth.id !== user.id && session.mentor.id !== user.id) {
       throw new NotFoundException(`Session #${sessionId} not found`);
+    }
+
+    if (session) {
+      await this.notificationService.create({
+        title: 'Session Updated',
+        userId: session.mentor.id,
+        message: `Session with ${session.youth.firstName} has been updated`,
+      });
+
+      await this.notificationService.create({
+        title: 'Session Updated',
+        userId: session.youth.id,
+        message: `Session with ${session.mentor.firstName} has been updated`,
+      });
     }
 
     const updatedSession = await this.mentorshipSessionRepository.save({
