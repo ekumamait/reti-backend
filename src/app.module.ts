@@ -10,6 +10,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { InspirationsModule } from './inspirations/inspirations.module';
 import { MentorshipSessionsModule } from './mentorship-sessions/mentorship-sessions.module';
 import { ChatGateway } from './chat/chat.gateway';
+import { SupportModule } from './support/support.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ChatGateway } from './chat/chat.gateway';
     JobsModule,
     InspirationsModule,
     MentorshipSessionsModule,
+    SupportModule,
   ],
   providers: [ChatGateway],
 })
