@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Inspiration } from '../database/entities/inspiration.entity';
@@ -155,57 +159,52 @@ export class InspirationsService {
   }
 
   async like(id: number, userId: number): Promise<ApiResponse<Inspiration>> {
-    // Use a transaction for atomicity
     return this.inspirationsRepository.manager.transaction(
       async (transactionalEntityManager) => {
-        // Get inspiration with lock
-        const inspiration = await transactionalEntityManager
-          .createQueryBuilder(Inspiration, 'inspiration')
-          .setLock('pessimistic_write')
-          .leftJoinAndSelect('inspiration.mentor', 'mentor')
-          .leftJoinAndSelect('inspiration.likedBy', 'likedBy')
-          .where('inspiration.id = :id', { id })
-          .getOne();
+        try {
+          const inspiration = await this.inspirationsRepository.findOne({
+            where: { id },
+            relations: ['mentor', 'likedBy'],
+          });
 
-        if (!inspiration) {
-          throw new NotFoundException(`Inspiration #${id} not found`);
-        }
+          if (!inspiration) {
+            throw new NotFoundException(`Inspiration #${id} not found`);
+          }
 
-        const user = await this.usersService.findOne(userId);
-        if (!user) {
-          throw new NotFoundException(`User #${userId} not found`);
-        }
+          const user = await this.usersService.findOne(userId);
+          if (!user) {
+            throw new NotFoundException(`User #${userId} not found`);
+          }
 
-        // Check if user has already liked
-        const hasLiked = inspiration.likedBy.some(
-          (likedUser) => likedUser.id === userId,
-        );
+          const hasLiked = inspiration.likedBy.some((u) => u.id === userId);
+          const updatedLikedBy = hasLiked
+            ? inspiration.likedBy.filter((u) => u.id !== userId)
+            : [...inspiration.likedBy, user];
 
-        if (hasLiked) {
-          // Unlike - Remove user and decrease count
-          inspiration.likedBy = inspiration.likedBy.filter(
-            (u) => u.id !== userId,
+          const updatedInspiration = await transactionalEntityManager.save(
+            Inspiration,
+            {
+              ...inspiration,
+              likedBy: updatedLikedBy,
+              likesCount: updatedLikedBy.length,
+            },
           );
-          inspiration.likesCount = Math.max(0, inspiration.likesCount - 1);
-        } else {
-          // Like - Add user and increase count
-          inspiration.likedBy.push(user);
-          inspiration.likesCount = inspiration.likedBy.length; // Ensure count matches actual likes
+
+          return returnResponse(
+            200,
+            hasLiked
+              ? 'Inspiration unliked successfully'
+              : 'Inspiration liked successfully',
+            updatedInspiration,
+          );
+        } catch (error) {
+          if (error instanceof NotFoundException) {
+            throw error;
+          }
+          throw new InternalServerErrorException(
+            'Failed to process like operation',
+          );
         }
-
-        // Save changes
-        const updatedInspiration = await transactionalEntityManager.save(
-          Inspiration,
-          inspiration,
-        );
-
-        return returnResponse(
-          200,
-          hasLiked
-            ? 'Inspiration unliked successfully'
-            : 'Inspiration liked successfully',
-          updatedInspiration,
-        );
       },
     );
   }
