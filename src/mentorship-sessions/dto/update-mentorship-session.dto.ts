@@ -40,6 +40,7 @@ export class UpdateMentorshipSessionDto {
   @MaxLength(500)
   notes?: string;
 
+  @IsOptional()
   @IsEnum(['CANCELED', 'COMPLETED', 'PENDING', 'CONFIRMED'])
   status: 'CANCELED' | 'COMPLETED' | 'PENDING' | 'CONFIRMED';
 }

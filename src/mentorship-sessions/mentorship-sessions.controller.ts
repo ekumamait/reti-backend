@@ -82,4 +82,12 @@ export class MentorshipSessionsController {
       updateDto,
     );
   }
+
+  @Delete(':id')
+  async deleteSession(
+    @Param('id') sessionId: number,
+    @Request() req: RequestWithUser,
+  ): Promise<ApiResponse<MentorshipSession>> {
+    return this.mentorshipSessionsService.deleteSession(req.user, sessionId);
+  }
 }
