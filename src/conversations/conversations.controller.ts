@@ -41,41 +41,34 @@ export class ConversationsController {
     return this.conversationsService.getUserConversations(req.user.id);
   }
 
-  @Patch(':conversationId/messages/:messageId/read')
+  @Patch(':id/read')
   async markMessageAsRead(
-    @Param('conversationId') conversationId: number,
-    @Param('messageId') messageId: number,
+    @Param('id') id: number,
+    @Request() req: RequestWithUser,
   ): Promise<ApiResponse<ConversationDto>> {
-    return this.conversationsService.markMessageAsRead(
-      conversationId,
-      messageId,
-    );
+    return this.conversationsService.markMessagesAsRead(id, req.user.id);
   }
 
-  @Patch(':conversationId/messages/:messageId')
+  @Patch(':id/messages/:messageId')
   async editMessage(
-    @Param('conversationId') conversationId: number,
+    @Param('id') id: number,
     @Param('messageId') messageId: number,
     @Body('content') newContent: string,
   ): Promise<ApiResponse<ConversationDto>> {
-    return this.conversationsService.editMessage(
-      conversationId,
-      messageId,
-      newContent,
-    );
+    return this.conversationsService.editMessage(id, messageId, newContent);
   }
 
-  @Get(':conversationId/messages')
+  @Get(':id/messages')
   async getConversationMessages(
-    @Param('conversationId') conversationId: number,
+    @Param('id') id: number,
   ): Promise<ApiResponse<any>> {
-    return this.conversationsService.getConversationMessages(conversationId);
+    return this.conversationsService.getConversationMessages(id);
   }
 
-  @Delete(':conversationId')
+  @Delete(':id')
   async deleteConversation(
-    @Param('conversationId') conversationId: number,
+    @Param('id') id: number,
   ): Promise<ApiResponse<ConversationDto>> {
-    return this.conversationsService.deleteConversation(conversationId);
+    return this.conversationsService.deleteConversation(id);
   }
 }

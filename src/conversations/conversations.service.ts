@@ -129,10 +129,14 @@ export class ConversationsService {
     );
   }
 
-  async markMessageAsRead(
+  async markMessagesAsRead(
     conversationId: number,
-    messageId: number,
+    userId: number,
   ): Promise<ApiResponse<ConversationDto>> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(ERROR_MESSAGES.USER_ID_NOT_FOUND(userId));
+    }
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
     });
@@ -143,16 +147,10 @@ export class ConversationsService {
       );
     }
 
-    const message = conversation.messages.find((msg) => msg.id === messageId);
-    if (!message) {
-      throw new NotFoundException(ERROR_MESSAGES.MESSAGE_NOT_FOUND(messageId));
-    }
-
-    message.isRead = true;
-
-    conversation.messages = conversation.messages.map((msg) =>
-      msg.id === messageId ? message : msg,
-    );
+    conversation.messages = conversation.messages.map((msg) => ({
+      ...msg,
+      isRead: true,
+    }));
 
     await this.conversationRepository.save(conversation);
     return returnResponse(
