@@ -10,9 +10,15 @@ import { Server, Socket } from 'socket.io';
 import { ConversationsService } from '../conversations/conversations.service';
 import { CreateConversationDto } from '../conversations/dto/create-conversation.dto';
 
+const allowedOrigins = [
+  process.env.LOCAL_FRONTEND_URL,
+  process.env.FRONTEND_URL,
+  process.env.LOCAL_FRONTEND_URL_ALT,
+].filter(Boolean);
+
 @WebSocketGateway({
   cors: {
-    origin: process.env.FRONTEND_URL || process.env.LOCAL_FRONTEND_URL,
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   },
