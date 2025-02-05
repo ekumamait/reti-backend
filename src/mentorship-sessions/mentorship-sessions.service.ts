@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MentorshipSession } from '../database/entities/mentorship-session.entity';
@@ -13,6 +17,7 @@ import {
   createPaginatedResponse,
 } from '../common/pagination.util';
 import { NotificationsService } from 'src/notifications/notifications.service';
+import { ERROR_MESSAGES } from 'src/common/constants';
 
 @Injectable()
 export class MentorshipSessionsService {
@@ -162,7 +167,6 @@ export class MentorshipSessionsService {
       throw new NotFoundException(`Session #${sessionId} not found`);
     }
 
-    // Only allow youth or mentor to update their own sessions
     if (session.youth.id !== user.id && session.mentor.id !== user.id) {
       throw new NotFoundException(`Session #${sessionId} not found`);
     }
@@ -187,5 +191,39 @@ export class MentorshipSessionsService {
     });
 
     return returnResponse(200, 'Session updated successfully', updatedSession);
+  }
+
+  async deleteSession(
+    user: User,
+    sessionId: number,
+  ): Promise<ApiResponse<MentorshipSession>> {
+    const session = await this.mentorshipSessionRepository.findOne({
+      where: { id: sessionId },
+      relations: ['mentor', 'youth'],
+    });
+
+    if (session.youth.id !== user.id && session.mentor.id !== user.id) {
+      throw new NotFoundException(`Session #${sessionId} not found`);
+    }
+
+    if (!session) {
+      throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
+    }
+
+    if (session) {
+      await this.notificationService.create({
+        title: 'Session Deleted',
+        userId: session.mentor.id,
+        message: `Session with ${session.youth.firstName} has been deleted`,
+      });
+
+      await this.notificationService.create({
+        title: 'Session Deleted',
+        userId: session.youth.id,
+        message: `Session with ${session.mentor.firstName} has been deleted`,
+      });
+    }
+    await this.mentorshipSessionRepository.remove(session);
+    return returnResponse(200, 'Session deleted successfully');
   }
 }
