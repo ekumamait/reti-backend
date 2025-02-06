@@ -29,4 +29,7 @@ export class InspirationDto {
 
   @IsDate()
   updatedAt: Date;
+
+  @IsString()
+  imageUrl?: string;
 }

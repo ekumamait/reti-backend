@@ -22,6 +22,9 @@ export class Job {
   @Column()
   description: string;
 
+  @Column({ nullable: true })
+  imageUrl: string;
+
   @Column()
   location: string;
 

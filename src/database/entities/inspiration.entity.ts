@@ -15,9 +15,6 @@ export class Inspiration {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  title: string;
-
   @Column('text', { default: '' })
   content: string;
 
@@ -36,4 +33,7 @@ export class Inspiration {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  imageUrl: string;
 }
