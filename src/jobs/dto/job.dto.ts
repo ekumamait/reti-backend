@@ -41,6 +41,10 @@ export class JobDto {
   @IsNotEmpty()
   location: string;
 
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
   @ValidateNested()
   @Type(() => SalaryRange)
   salary: SalaryRange;

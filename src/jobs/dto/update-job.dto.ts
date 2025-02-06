@@ -33,6 +33,10 @@ export class UpdateJobDto {
   @IsOptional()
   location?: string;
 
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
   @ValidateNested()
   @Type(() => SalaryRange)
   @IsOptional()

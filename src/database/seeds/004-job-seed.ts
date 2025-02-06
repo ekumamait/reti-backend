@@ -33,6 +33,8 @@ export default class CreateJobs implements Seeder {
         applicationDeadline: new Date('2025-12-31'),
         companyName: 'Tech Corp',
         contactEmail: 'hr@techcorp.com',
+        imageUrl:
+          'https://images.unsplash.com/photo-1529688530647-93a6e1916f5f?q=80&w=2498&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       },
       {
         title: 'Data Scientist',
@@ -50,6 +52,8 @@ export default class CreateJobs implements Seeder {
         applicationDeadline: new Date('2025-11-30'),
         companyName: 'Health Analytics',
         contactEmail: 'jobs@healthanalytics.com',
+        imageUrl:
+          'https://images.unsplash.com/photo-1529688530647-93a6e1916f5f?q=80&w=2498&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       },
       {
         title: 'Marketing Manager',
@@ -67,6 +71,8 @@ export default class CreateJobs implements Seeder {
         applicationDeadline: new Date('2025-10-15'),
         companyName: 'AdVentures',
         contactEmail: 'marketing@adventures.com',
+        imageUrl:
+          'https://images.unsplash.com/photo-1529688530647-93a6e1916f5f?q=80&w=2498&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       },
       {
         title: 'Product Manager',
@@ -84,6 +90,8 @@ export default class CreateJobs implements Seeder {
         applicationDeadline: new Date('2025-09-25'),
         companyName: 'InnovateX',
         contactEmail: 'pm@innovatex.com',
+        imageUrl:
+          'https://images.unsplash.com/photo-1529688530647-93a6e1916f5f?q=80&w=2498&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       },
       {
         title: 'UI/UX Designer',
@@ -101,6 +109,8 @@ export default class CreateJobs implements Seeder {
         applicationDeadline: new Date('2025-08-20'),
         companyName: 'Creative Studios',
         contactEmail: 'design@creativestudios.com',
+        imageUrl:
+          'https://images.unsplash.com/photo-1529688530647-93a6e1916f5f?q=80&w=2498&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       },
       {
         title: 'DevOps Engineer',
@@ -118,6 +128,8 @@ export default class CreateJobs implements Seeder {
         applicationDeadline: new Date('2025-07-15'),
         companyName: 'Cloud Solutions',
         contactEmail: 'jobs@cloudsolutions.com',
+        imageUrl:
+          'https://images.unsplash.com/photo-1529688530647-93a6e1916f5f?q=80&w=2498&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       },
       {
         title: 'Cybersecurity Analyst',
@@ -135,6 +147,8 @@ export default class CreateJobs implements Seeder {
         applicationDeadline: new Date('2025-06-30'),
         companyName: 'SecureTech',
         contactEmail: 'security@securetech.com',
+        imageUrl:
+          'https://images.unsplash.com/photo-1529688530647-93a6e1916f5f?q=80&w=2498&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       },
       {
         title: 'HR Manager',
@@ -152,6 +166,8 @@ export default class CreateJobs implements Seeder {
         applicationDeadline: new Date('2025-05-20'),
         companyName: 'PeopleFirst',
         contactEmail: 'hr@peoplefirst.com',
+        imageUrl:
+          'https://images.unsplash.com/photo-1529688530647-93a6e1916f5f?q=80&w=2498&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       },
       {
         title: 'AI Researcher',
@@ -169,6 +185,8 @@ export default class CreateJobs implements Seeder {
         applicationDeadline: new Date('2025-04-10'),
         companyName: 'AI Labs',
         contactEmail: 'research@ailabs.com',
+        imageUrl:
+          'https://images.unsplash.com/photo-1529688530647-93a6e1916f5f?q=80&w=2498&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       },
       {
         title: 'Content Writer',
@@ -186,6 +204,8 @@ export default class CreateJobs implements Seeder {
         applicationDeadline: new Date('2025-03-15'),
         companyName: 'WriteWell',
         contactEmail: 'editor@writewell.com',
+        imageUrl:
+          'https://images.unsplash.com/photo-1529688530647-93a6e1916f5f?q=80&w=2498&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
       },
     ];
 
