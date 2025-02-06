@@ -68,6 +68,7 @@ export class ConversationsService {
         updatedConversation,
       );
     }
+
     const conversation = this.conversationRepository.create({
       ...createConversationDto,
       messages: detailedMessages,

@@ -5,6 +5,7 @@ import {
   WebSocketServer,
   ConnectedSocket,
   MessageBody,
+  OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ConversationsService } from '../conversations/conversations.service';
@@ -23,13 +24,27 @@ const allowedOrigins = [
     credentials: true,
   },
 })
-export class ChatGateway implements OnGatewayConnection {
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() io: Server;
+  private onlineUsers = new Set<string>();
+
   constructor(private readonly conversationsService: ConversationsService) {}
 
   handleConnection(client: Socket) {
-    const userId = client.handshake.query.userId;
-    client.data.userId = userId;
+    const userId = client.handshake.query.userId as string;
+    if (userId) {
+      client.data.userId = userId;
+      this.onlineUsers[userId] = true;
+      this.io.emit('online-users', this.onlineUsers);
+    }
+  }
+
+  handleDisconnect(client: Socket) {
+    const userId = client.data.userId;
+    if (userId) {
+      delete this.onlineUsers[userId];
+      this.io.emit('online-users', this.onlineUsers);
+    }
   }
 
   @SubscribeMessage('sendMessage')
@@ -42,7 +57,26 @@ export class ChatGateway implements OnGatewayConnection {
       userId,
       createConversationDto,
     );
+
     client.emit('conversation', conversation);
     this.io.emit('receiveMessage', conversation);
+  }
+
+  @SubscribeMessage('user-online')
+  handleUserOnline(@ConnectedSocket() client: Socket) {
+    const userId = client.data.userId;
+    if (userId) {
+      this.onlineUsers[userId] = true;
+      this.io.emit('online-users', this.onlineUsers);
+    }
+  }
+
+  @SubscribeMessage('user-offline')
+  handleUserOffline(@ConnectedSocket() client: Socket) {
+    const userId = client.data.userId;
+    if (userId) {
+      delete this.onlineUsers[userId];
+      this.io.emit('online-users', this.onlineUsers);
+    }
   }
 }
