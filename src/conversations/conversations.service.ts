@@ -67,15 +67,12 @@ export class ConversationsService {
         SUCCESS_MESSAGES.MESSAGE_SENT,
         updatedConversation,
       );
-    } else {
-      console.log('Detailed', detailedMessages);
     }
 
     const conversation = this.conversationRepository.create({
       ...createConversationDto,
       messages: detailedMessages,
     });
-    console.log('convo', conversation);
     const savedConversation = await this.conversationRepository.save(
       conversation,
     );
