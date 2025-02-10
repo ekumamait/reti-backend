@@ -35,6 +35,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (userId) {
       client.data.userId = userId;
       this.onlineUsers[userId] = true;
+      client.join(userId);
       this.io.emit('online-users', this.onlineUsers);
     }
   }
@@ -53,13 +54,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() createConversationDto: CreateConversationDto,
   ) {
     const userId = client.data.userId;
+    const receiverId = createConversationDto.messages[0]?.receiverId;
+
+    if (!receiverId) {
+      return client.emit('error', 'receiverId is missing');
+    }
     const conversation = await this.conversationsService.createConversation(
       userId,
       createConversationDto,
     );
 
     client.emit('conversation', conversation);
-    this.io.emit('receiveMessage', conversation);
+    this.io
+      .to(userId)
+      .to(receiverId.toString())
+      .emit('receiveMessage', conversation);
   }
 
   @SubscribeMessage('user-online')
@@ -67,6 +76,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = client.data.userId;
     if (userId) {
       this.onlineUsers[userId] = true;
+      client.join(userId);
       this.io.emit('online-users', this.onlineUsers);
     }
   }
@@ -76,7 +86,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = client.data.userId;
     if (userId) {
       delete this.onlineUsers[userId];
+      client.leave(userId);
       this.io.emit('online-users', this.onlineUsers);
     }
+  }
+
+  @SubscribeMessage('join-room')
+  handleJoinRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { userId: string },
+  ) {
+    client.join(data.userId);
   }
 }
