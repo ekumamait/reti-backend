@@ -7,6 +7,20 @@ export default class CreateProfiles implements Seeder {
     const existingProfiles = await connection.getRepository(Profile).find();
 
     if (existingProfiles.length === 0) {
+      const partners = [
+        'Dan Church Aid (DCA)',
+        'Bishop Stuart University (BSU)',
+        'CEFORD (CEF)',
+        'Finn Church Aid (FCA)',
+        'Gulu University (GUN)',
+        'Meeting Points Kitgum (MPK)',
+        'Muni University (MUN)',
+        'PALM Corps (PAC)',
+        'YARID (YAR)',
+      ];
+      const getRandomPartner = () =>
+        partners[Math.floor(Math.random() * partners.length)];
+
       const profiles: Partial<Profile>[] = Array.from(
         { length: 20 },
         (_, i) => ({
@@ -44,7 +58,7 @@ export default class CreateProfiles implements Seeder {
             hostContact: '+256789456123',
           },
           geoLocationDetails: {
-            partnerResponsible: 'Dan Church Aid (DCA)',
+            partnerResponsible: getRandomPartner(),
             region: 'Northern',
             district: `District ${i + 1}`,
             settlement: `Settlement ${i + 1}`,

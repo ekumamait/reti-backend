@@ -3,6 +3,8 @@ export const USER_ROLES = {
   MENTOR: 'mentor',
   EMPLOYER: 'employer',
   ADMIN: 'admin',
+  SUPER: 'super',
+  STAFF: 'staff',
 };
 
 export enum MentorshipSessionStatus {
