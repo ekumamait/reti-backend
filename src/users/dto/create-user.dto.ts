@@ -23,11 +23,20 @@ export class CreateUserDto {
   @IsNotEmpty()
   phoneNumber: string;
 
-  @IsEnum([USER_ROLES.YOUTH, USER_ROLES.EMPLOYER, USER_ROLES.MENTOR], {
-    message: 'Valid role required',
-  })
+  @IsEnum(
+    [
+      USER_ROLES.YOUTH,
+      USER_ROLES.EMPLOYER,
+      USER_ROLES.MENTOR,
+      USER_ROLES.SUPER,
+      USER_ROLES.STAFF,
+    ],
+    {
+      message: 'Valid role required',
+    },
+  )
   @IsNotEmpty()
-  role: 'youth' | 'mentor' | 'employer' | 'admin' = 'youth';
+  role: 'youth' | 'mentor' | 'super' | 'staff' | 'employer' | 'admin' = 'youth';
 
   @IsString()
   @MinLength(8)

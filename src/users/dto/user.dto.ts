@@ -36,9 +36,17 @@ export class UserDto {
   @IsNotEmpty()
   password: string;
 
-  @IsEnum([USER_ROLES.YOUTH, USER_ROLES.MENTOR, USER_ROLES.EMPLOYER], {
-    message: 'Valid role required',
-  })
+  @IsEnum(
+    [
+      USER_ROLES.YOUTH,
+      USER_ROLES.MENTOR,
+      USER_ROLES.EMPLOYER,
+      USER_ROLES.SUPER,
+    ],
+    {
+      message: 'Valid role required',
+    },
+  )
   @IsNotEmpty()
-  role: 'youth' | 'mentor' | 'employer' | 'admin' = 'youth';
+  role: 'youth' | 'mentor' | 'super' | 'staff' | 'employer' | 'admin' = 'youth';
 }

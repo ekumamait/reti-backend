@@ -29,7 +29,7 @@ export class User {
   phoneNumber: string;
 
   @Column({ default: 'youth' })
-  role: 'youth' | 'mentor' | 'employer' | 'admin';
+  role: 'youth' | 'mentor' | 'employer' | 'admin' | 'super' | 'staff';
 
   @Column({ default: false })
   isOnboarded: boolean;

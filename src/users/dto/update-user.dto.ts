@@ -20,10 +20,10 @@ export class UpdateUserDto {
   phoneNumber?: string;
 
   @IsOptional()
-  @IsEnum(['youth', 'mentor', 'employer', 'admin'], {
+  @IsEnum(['youth', 'mentor', 'employer', 'admin', 'super', 'staff'], {
     message: 'Valid role required',
   })
-  role?: 'youth' | 'mentor' | 'employer' | 'admin';
+  role?: 'youth' | 'mentor' | 'employer' | 'admin' | 'super' | 'staff';
 
   @IsOptional()
   @IsString()
