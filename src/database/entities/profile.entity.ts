@@ -24,6 +24,12 @@ export class Profile {
   @Column({ nullable: true })
   profileImage: string;
 
+  @Column({ default: false })
+  isRetiCandidate: boolean;
+
+  @Column({ nullable: true })
+  retiPartner: string;
+
   @Column('text', { array: true, nullable: true, default: [] })
   skills: string[];
 

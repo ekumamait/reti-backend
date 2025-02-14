@@ -8,6 +8,8 @@ import {
   IsNotEmpty,
   IsInt,
   IsEmail,
+  MinLength,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { StakeholderLinksDto } from './profile.dto';
@@ -17,6 +19,10 @@ export class CreateProfileDto {
   @IsOptional()
   @IsString()
   profileImage?: string;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  isRetiCandidate?: boolean;
 
   @ApiProperty({ type: [String], required: false })
   @IsOptional()
@@ -53,6 +59,10 @@ export class CreateProfileDto {
   @IsString()
   @IsNotEmpty()
   gender: string;
+
+  @IsString()
+  @IsNotEmpty()
+  retiPartner: string;
 
   @ApiProperty({ required: false })
   @IsEmail()

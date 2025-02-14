@@ -4,6 +4,8 @@ import {
   IsArray,
   IsNumber,
   IsObject,
+  IsBoolean,
+  IsNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
@@ -36,6 +38,9 @@ export class ProfileDto {
   @IsOptional()
   profileImage?: string;
 
+  @IsBoolean()
+  isRetiCandidate?: boolean;
+
   @ApiProperty({ type: [String], required: false })
   @IsArray()
   @IsString({ each: true })
@@ -66,6 +71,10 @@ export class ProfileDto {
   @IsString()
   @IsOptional()
   phoneNumber?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  retiPartner: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
