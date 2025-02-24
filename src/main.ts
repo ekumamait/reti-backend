@@ -40,6 +40,7 @@ async function bootstrap() {
     .addTag('profiles')
     .addTag('messages')
     .addTag('conversations')
+    .addTag('jobemail')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
