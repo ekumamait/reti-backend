@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsUrl,
   IsArray,
+  IsBoolean,
 } from 'class-validator';
 
 export class ProductDto {
@@ -34,4 +35,10 @@ export class ProductDto {
   @IsArray()
   @IsString({ each: true })
   imageUrl?: string[];
+
+  @IsNumber()
+  userId?: number;
+
+  @IsBoolean()
+  isActive: boolean;
 }
