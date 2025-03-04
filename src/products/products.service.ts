@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../database/entities/product.entity';
@@ -11,6 +15,8 @@ import {
   getPaginationParams,
   createPaginatedResponse,
 } from '../common/pagination.util';
+import { ProductDto } from './dto/product.dto';
+import { UserDto } from 'src/users/dto/user.dto';
 
 @Injectable()
 export class ProductsService {
@@ -21,13 +27,32 @@ export class ProductsService {
 
   async create(
     createProductDto: CreateProductDto,
-  ): Promise<ApiResponse<Product>> {
-    const product = this.productsRepository.create(createProductDto);
+    creator: UserDto,
+  ): Promise<ApiResponse<ProductDto>> {
+    const existingProduct = await this.productsRepository.findOne({
+      where: {
+        name: createProductDto.name,
+        description: createProductDto.description,
+        user: { id: creator.id },
+      },
+    });
+
+    if (existingProduct) {
+      throw new ConflictException(
+        'A product with the same name and description already exists for this user.',
+      );
+    }
+    const product = this.productsRepository.create({
+      ...createProductDto,
+      userId: creator.id,
+    });
     const savedProduct = await this.productsRepository.save(product);
     return returnResponse(201, 'Product created successfully', savedProduct);
   }
 
-  async findAll(query?: ProductQueryDto): Promise<PaginatedResponse<Product>> {
+  async findAll(
+    query?: ProductQueryDto,
+  ): Promise<PaginatedResponse<ProductDto>> {
     const { page, limit, skip, sortBy, sortOrder } = getPaginationParams(
       query || {},
     );
@@ -48,7 +73,7 @@ export class ProductsService {
     );
   }
 
-  async findOne(id: string): Promise<ApiResponse<Product>> {
+  async findOne(id: string): Promise<ApiResponse<ProductDto>> {
     const product = await this.productsRepository.findOne({
       where: { id },
     });
@@ -63,7 +88,7 @@ export class ProductsService {
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
-  ): Promise<ApiResponse<Product>> {
+  ): Promise<ApiResponse<ProductDto>> {
     const product = await this.productsRepository.findOne({
       where: { id },
     });
@@ -80,7 +105,7 @@ export class ProductsService {
     return returnResponse(200, 'Product updated successfully', updatedProduct);
   }
 
-  async remove(id: string): Promise<ApiResponse<Product>> {
+  async remove(id: string): Promise<ApiResponse<ProductDto>> {
     const product = await this.productsRepository.findOne({
       where: { id },
     });
