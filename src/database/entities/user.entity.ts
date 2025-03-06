@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { Conversation } from './conversation.entity';
 import { Notification } from './notification.entity';
@@ -12,11 +13,18 @@ import { Job } from './job.entity';
 import { IsPhoneNumber } from 'class-validator';
 import { MentorshipSession } from './mentorship-session.entity';
 import { Inspiration } from './inspiration.entity';
+import { Profile } from './profile.entity';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @OneToOne(() => Profile, (profile) => profile.user, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
+  profile: Profile;
 
   @Column()
   firstName: string;
