@@ -11,9 +11,15 @@ import { InspirationsModule } from './inspirations/inspirations.module';
 import { MentorshipSessionsModule } from './mentorship-sessions/mentorship-sessions.module';
 import { ChatGateway } from './chat/chat.gateway';
 import { SupportModule } from './support/support.module';
+import { JobEmailModule } from './opportunity/opportunity.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { join } from 'path';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'postgres',
@@ -26,6 +32,26 @@ import { SupportModule } from './support/support.module';
         synchronize: true,
       }),
     }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        transport: {
+          service: 'Gmail',
+          auth: {
+            user: config.getOrThrow('SMTP_USER'),
+            pass: config.getOrThrow('SMTP_PASSWORD'),
+          },
+        },
+        template: {
+          dir: join(__dirname, 'templates'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
     UsersModule,
     AuthModule,
     ProfileModule,
@@ -35,6 +61,7 @@ import { SupportModule } from './support/support.module';
     JobsModule,
     InspirationsModule,
     MentorshipSessionsModule,
+    JobEmailModule,
     SupportModule,
   ],
   providers: [ChatGateway],
