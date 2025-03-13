@@ -61,7 +61,7 @@ export class CreateProfileDto {
   gender: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   retiPartner: string;
 
   @ApiProperty({ required: false })

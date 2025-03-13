@@ -259,6 +259,9 @@ export class UsersService {
 
   async remove(id: number): Promise<ApiResponse<UserDto>> {
     const user = await this.findOne(id);
+    if (!user) {
+      throw new NotFoundException(ERROR_MESSAGES.USER_ID_NOT_FOUND(id));
+    }
     await this.userRepository.remove(user);
     return returnResponse(200, SUCCESS_MESSAGES.USER_DELETED, user);
   }
