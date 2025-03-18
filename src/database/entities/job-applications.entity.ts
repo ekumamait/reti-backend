@@ -1,13 +1,25 @@
-import { Entity, PrimaryGeneratedColumn, Column, Unique } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  Unique,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
+import { Job } from './job.entity';
 
 @Entity('job_applications')
-@Unique(['userId'])
+@Unique(['userId', 'jobId'])
 export class JobApplication {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   userId: number;
+
+  @ManyToOne(() => Job, (job) => job.applications)
+  @JoinColumn({ name: 'jobId' })
+  job: Job;
 
   @Column()
   jobId: number;

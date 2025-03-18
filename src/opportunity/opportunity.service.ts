@@ -17,12 +17,15 @@ import { SharedApplication } from 'src/database/entities/shared-applications.ent
 import { Repository } from 'typeorm';
 import { Job } from 'src/database/entities/job.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { Express } from 'express';
 
 @Injectable()
 export class JobEmailService {
   constructor(
     private readonly mailerService: MailerService,
     private readonly profileService: ProfileService,
+    private readonly notificationsService: NotificationsService,
     @InjectRepository(JobApplication)
     private readonly jobApplicationRepository: Repository<JobApplication>,
     @InjectRepository(SharedApplication)
@@ -34,15 +37,17 @@ export class JobEmailService {
   async sendOpportunityApplicationEmail(
     userId: number,
     emailDto: SendOpportunityEmailDto,
+    file: Express.Multer.File,
   ): Promise<ApiResponse<SendOpportunityEmailDto>> {
     const job = await this.jobRepository.findOne({
       where: { id: emailDto.jobId },
+      relations: ['employer'],
     });
     if (!job) {
       throw new NotFoundException(`Job with ID ${emailDto.jobId} not found.`);
     }
     const existingApplication = await this.jobApplicationRepository.findOne({
-      where: { userId, jobId: emailDto.jobId },
+      where: { userId, job: { id: emailDto.jobId } },
     });
     if (existingApplication) {
       throw new ConflictException('You have already applied for this job.');
@@ -51,8 +56,7 @@ export class JobEmailService {
     if (!profileResponse) {
       throw new NotFoundException(ERROR_MESSAGES.PROFILE_NOT_FOUND(userId));
     }
-    const profile = profileResponse.data;
-    const pdfFilePath = await generateProfilePDF(profile);
+
     const message = `Hello ${emailDto.employerName}, I am interested in the ${emailDto.jobTitle} position. 
 Looking forward to your response. Thank you`;
     await this.mailerService.sendMail({
@@ -63,24 +67,30 @@ Looking forward to your response. Thank you`;
       attachments: [
         {
           filename: `Applicant_Profile_${userId}.pdf`,
-          path: pdfFilePath,
+          content: file.buffer,
           contentType: 'application/pdf',
         },
       ],
     });
     const newApplication = this.jobApplicationRepository.create({
       userId,
-      jobId: emailDto.jobId,
+      job: { id: emailDto.jobId },
     });
     await this.jobApplicationRepository.save(newApplication);
 
-    fs.unlinkSync(pdfFilePath);
+    await this.notificationsService.create({
+      title: 'New Job Application',
+      userId: job.employer.id,
+      message: `${emailDto.applicantName} has applied for the job: ${emailDto.jobTitle}.`,
+    });
+
     return returnResponse(201, 'Application email sent successfully');
   }
 
   async hasUserApplied(userId: number, jobId: number): Promise<boolean> {
     const existingApplication = await this.jobApplicationRepository.findOne({
-      where: { userId, jobId },
+      where: { userId, job: { id: jobId } },
+      relations: ['job'],
     });
     return !!existingApplication;
   }

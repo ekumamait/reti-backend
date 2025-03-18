@@ -7,8 +7,10 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  OneToMany,
 } from 'typeorm';
 import { User } from './user.entity';
+import { JobApplication } from './job-applications.entity';
 
 @Entity()
 @Unique(['title', 'location', 'employer'])
@@ -61,6 +63,9 @@ export class Job {
     enum: ['fulltime', 'part-time', 'freelance'],
   })
   jobType: 'fulltime' | 'part-time' | 'freelance';
+
+  @OneToMany(() => JobApplication, (application) => application.job)
+  applications: JobApplication[];
 
   @Column()
   applicationDeadline: Date;

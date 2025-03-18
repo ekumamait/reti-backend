@@ -6,11 +6,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JobApplication } from 'src/database/entities/job-applications.entity';
 import { SharedApplication } from 'src/database/entities/shared-applications.entity';
 import { Job } from 'src/database/entities/job.entity';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([JobApplication, SharedApplication, Job]),
     ProfileModule,
+    NotificationsModule,
   ],
   controllers: [JobEmailController],
   providers: [JobEmailService],
