@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { SendOpportunityEmailDto } from './dto/send-opportunity-email.dto';
+import { ShareProfileEmailDto } from './dto/share-profileEmail.dto';
 import { ApiResponse, returnResponse } from 'src/common/response.util';
 import { generateProfilePDF } from 'src/utils/generate-profile-pdf';
 import * as fs from 'fs';
@@ -12,8 +13,10 @@ import { ProfileService } from 'src/profile/profile.service';
 import { ERROR_MESSAGES } from 'src/common/constants';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JobApplication } from 'src/database/entities/job-applications.entity';
+import { SharedApplication } from 'src/database/entities/shared-applications.entity';
 import { Repository } from 'typeorm';
 import { Job } from 'src/database/entities/job.entity';
+import { Express } from 'express';
 
 @Injectable()
 export class JobEmailService {
@@ -22,6 +25,8 @@ export class JobEmailService {
     private readonly profileService: ProfileService,
     @InjectRepository(JobApplication)
     private readonly jobApplicationRepository: Repository<JobApplication>,
+    @InjectRepository(SharedApplication)
+    private readonly sharedApplicationRepository: Repository<SharedApplication>,
     @InjectRepository(Job)
     private jobRepository: Repository<Job>,
   ) {}
@@ -78,5 +83,36 @@ Looking forward to your response. Thank you`;
       where: { userId, jobId },
     });
     return !!existingApplication;
+  }
+
+  async shareProfileByEmail(
+    userId: number,
+    sharedEmailDto: ShareProfileEmailDto,
+    file: Express.Multer.File,
+  ): Promise<ApiResponse<any>> {
+    const message = `Hello, Below I've attached my resume, kind regards. 
+    Looking forward to your response. Thank you`;
+
+    await this.mailerService.sendMail({
+      to: sharedEmailDto.recipientEmail,
+      subject: sharedEmailDto.subject || 'Shared Profile Application',
+      template: 'shared-profile-email',
+      context: { ...sharedEmailDto, message },
+      attachments: [
+        {
+          filename: `Applicant_Profile_${userId}.pdf`,
+          content: file.buffer,
+          contentType: file.mimetype,
+        },
+      ],
+    });
+
+    await this.sharedApplicationRepository.save({
+      userId,
+      recipientEmail: sharedEmailDto.recipientEmail,
+      sentAt: new Date(),
+    });
+
+    return returnResponse(201, 'Profile shared successfully');
   }
 }
