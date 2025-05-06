@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Profile } from '../database/entities/profile.entity';
@@ -47,6 +51,8 @@ export class ProfileService {
 
   async findOne(id: number): Promise<any> {
     const profile = await this.profileRepository.findOne({ where: { id } });
+    console.log(profile, '>>>>>>>>>>');
+
     if (!profile) throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
     return profile;
   }
@@ -70,7 +76,26 @@ export class ProfileService {
     id: number,
     updateProfileDto: UpdateProfileDto,
   ): Promise<ApiResponse<ProfileDto>> {
-    const profile = await this.findOne(id);
+    const profile = await this.profileRepository.findOne({
+      where: { userId: id },
+      relations: ['user'],
+    });
+    if (!profile) {
+      throw new NotFoundException(ERROR_MESSAGES.PROFILE_NOT_FOUND(id));
+    }
+
+    if (
+      updateProfileDto.phoneNumber &&
+      updateProfileDto.phoneNumber !== profile.phoneNumber
+    ) {
+      const existingProfile = await this.profileRepository.findOne({
+        where: { phoneNumber: updateProfileDto.phoneNumber },
+      });
+      if (existingProfile) {
+        throw new ConflictException('Phone number already exists');
+      }
+    }
+
     Object.assign(profile, updateProfileDto);
     const updatedProfile = await this.profileRepository.save(profile);
     return returnResponse(
