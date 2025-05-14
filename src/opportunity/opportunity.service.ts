@@ -16,7 +16,7 @@ import { JobApplication } from 'src/database/entities/job-applications.entity';
 import { SharedApplication } from 'src/database/entities/shared-applications.entity';
 import { Repository } from 'typeorm';
 import { Job } from 'src/database/entities/job.entity';
-import { Express } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Injectable()
 export class JobEmailService {
