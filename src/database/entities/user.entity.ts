@@ -42,7 +42,10 @@ export class User {
   @Column({ default: false })
   isOnboarded: boolean;
 
-  @OneToMany(() => Notification, (notification) => notification.user)
+  @OneToMany(() => Notification, (notification) => notification.user, {
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   notifications: Notification[];
 
   @OneToMany(() => Product, (product) => product.user)

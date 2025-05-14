@@ -19,12 +19,15 @@ import {
   getPaginationParams,
   createPaginatedResponse,
 } from '../common/pagination.util';
+import { Profile } from 'src/database/entities/profile.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Profile)
+    private readonly profileRepository: Repository<Profile>,
   ) {}
 
   async findAll(query?: UserQueryDto): Promise<PaginatedResponse<User>> {
@@ -258,11 +261,29 @@ export class UsersService {
   }
 
   async remove(id: number): Promise<ApiResponse<UserDto>> {
-    const user = await this.findOne(id);
-    if (!user) {
-      throw new NotFoundException(ERROR_MESSAGES.USER_ID_NOT_FOUND(id));
-    }
-    await this.userRepository.remove(user);
-    return returnResponse(200, SUCCESS_MESSAGES.USER_DELETED, user);
+    return await this.userRepository.manager.transaction(async (manager) => {
+      const user = await manager.findOne(User, {
+        where: { id },
+        relations: ['notifications', 'profile'],
+      });
+
+      if (!user) {
+        throw new NotFoundException(ERROR_MESSAGES.USER_ID_NOT_FOUND(id));
+      }
+
+      // Delete related records first
+      if (user.notifications?.length) {
+        await manager.remove(user.notifications);
+      }
+
+      if (user.profile) {
+        await manager.remove(user.profile);
+      }
+
+      // Finally delete the user
+      await manager.remove(user);
+
+      return returnResponse(200, SUCCESS_MESSAGES.USER_DELETED, user);
+    });
   }
 }
