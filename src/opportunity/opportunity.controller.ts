@@ -26,9 +26,11 @@ export class JobEmailController {
 
   @ApiBearerAuth()
   @Post()
+  @UseInterceptors(FileInterceptor('file'))
   async sendOpportunityEmail(
     @Body() request: SendOpportunityEmailDto,
     @Request() req: RequestWithUser,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<ApiResponse<SendOpportunityEmailDto>> {
     const userId = req.user.id;
     const emailDto: SendOpportunityEmailDto = {
@@ -39,6 +41,7 @@ export class JobEmailController {
     return this.jobemailService.sendOpportunityApplicationEmail(
       userId,
       emailDto,
+      file,
     );
   }
 
@@ -69,11 +72,14 @@ export class JobEmailController {
   @ApiBearerAuth()
   @Get('applied/:jobId')
   async hasApplied(
-    @Param('jobId') jobId: number,
+    @Param('jobId') jobId: string,
     @Request() req: RequestWithUser,
   ): Promise<{ hasApplied: boolean }> {
     const userId = req.user.id;
-    const hasApplied = await this.jobemailService.hasUserApplied(userId, jobId);
+    const hasApplied = await this.jobemailService.hasUserApplied(
+      userId,
+      Number(jobId),
+    );
     return { hasApplied };
   }
 }
