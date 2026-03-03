@@ -23,4 +23,4 @@ jobs:
             git pull origin dev
             npm install
             npm run build
-            pm2 restart reti-backend
+            pm2 restart reti-backend --watch
