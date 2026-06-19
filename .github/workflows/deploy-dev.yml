@@ -14,7 +14,7 @@ jobs:
         run: |
           set -e
           git pull origin dev
-          npm ci
+          npm ci --legacy-peer-deps
           npm run build
           pm2 restart retivate-backend --update-env || pm2 start dist/main.js --name retivate-backend
           pm2 save
