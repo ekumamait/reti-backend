@@ -21,6 +21,6 @@ export class ProductQueryDto implements PaginationParams {
   sortOrder?: 'ASC' | 'DESC';
 
   @IsOptional()
-  @IsString()
+  @IsEnum(['name', 'price', 'stockQuantity', 'createdAt', 'updatedAt'])
   sortBy?: string;
 }

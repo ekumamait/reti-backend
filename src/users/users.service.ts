@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,7 +12,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UserDto } from './dto/user.dto';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../common/constants';
+import {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+  USER_ROLES,
+} from '../common/constants';
 import { returnResponse, ApiResponse } from '../common/response.util';
 import { UserQueryDto } from './dto/user-query.dto';
 import {
@@ -21,6 +26,12 @@ import {
 } from '../common/pagination.util';
 import { Profile } from 'src/database/entities/profile.entity';
 
+const STAFF_ROLES: string[] = [
+  USER_ROLES.ADMIN,
+  USER_ROLES.SUPER,
+  USER_ROLES.STAFF,
+];
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -29,6 +40,12 @@ export class UsersService {
     @InjectRepository(Profile)
     private readonly profileRepository: Repository<Profile>,
   ) {}
+
+  private assertCanModify(targetId: number, requester: User): void {
+    if (requester.id !== targetId && !STAFF_ROLES.includes(requester.role)) {
+      throw new ForbiddenException(ERROR_MESSAGES.UNAUTHORIZED);
+    }
+  }
 
   async findAll(query?: UserQueryDto): Promise<PaginatedResponse<User>> {
     const { page, limit, skip, search, sortBy, sortOrder } =
@@ -152,7 +169,6 @@ export class UsersService {
         'phoneNumber',
         'role',
         'isOnboarded',
-        'password',
         'createdAt',
       ],
     });
@@ -230,7 +246,10 @@ export class UsersService {
   async update(
     id: number,
     updateUserDto: UpdateUserDto,
+    requester: User,
   ): Promise<ApiResponse<UserDto>> {
+    this.assertCanModify(id, requester);
+
     const user = await this.findOne(id);
 
     if (
@@ -260,7 +279,11 @@ export class UsersService {
     return returnResponse(200, SUCCESS_MESSAGES.USER_UPDATED, updatedUser);
   }
 
-  async remove(id: number): Promise<ApiResponse<UserDto>> {
+  async remove(id: number, requester: User): Promise<ApiResponse<UserDto>> {
+    if (requester.role !== USER_ROLES.SUPER) {
+      throw new ForbiddenException(ERROR_MESSAGES.UNAUTHORIZED);
+    }
+
     return await this.userRepository.manager.transaction(async (manager) => {
       const user = await manager.findOne(User, {
         where: { id },

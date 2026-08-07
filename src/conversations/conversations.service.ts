@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Conversation } from '../database/entities/conversation.entity';
@@ -16,6 +20,15 @@ export class ConversationsService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
+
+  private assertParticipant(conversation: Conversation, userId: number): void {
+    const isParticipant = conversation.messages.some(
+      (msg) => msg.senderId === userId || msg.receiverId === userId,
+    );
+    if (!isParticipant) {
+      throw new ForbiddenException(ERROR_MESSAGES.UNAUTHORIZED);
+    }
+  }
 
   async createConversation(
     userId: number,
@@ -112,6 +125,7 @@ export class ConversationsService {
 
   async getConversationMessages(
     conversationId: number,
+    userId: number,
   ): Promise<ApiResponse<any>> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
@@ -122,6 +136,8 @@ export class ConversationsService {
         ERROR_MESSAGES.CONVERSATION_NOT_FOUND(conversationId),
       );
     }
+
+    this.assertParticipant(conversation, userId);
 
     return returnResponse(
       200,
@@ -165,6 +181,7 @@ export class ConversationsService {
     conversationId: number,
     messageId: number,
     newContent: string,
+    userId: number,
   ): Promise<ApiResponse<ConversationDto>> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
@@ -176,9 +193,15 @@ export class ConversationsService {
       );
     }
 
+    this.assertParticipant(conversation, userId);
+
     const message = conversation.messages.find((msg) => msg.id === messageId);
     if (!message) {
       throw new NotFoundException(ERROR_MESSAGES.MESSAGE_NOT_FOUND(messageId));
+    }
+
+    if (message.senderId !== userId) {
+      throw new ForbiddenException(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
     message.content = newContent;
@@ -193,6 +216,7 @@ export class ConversationsService {
 
   async deleteConversation(
     conversationId: number,
+    userId: number,
   ): Promise<ApiResponse<ConversationDto>> {
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
@@ -203,6 +227,8 @@ export class ConversationsService {
         ERROR_MESSAGES.CONVERSATION_NOT_FOUND(conversationId),
       );
     }
+
+    this.assertParticipant(conversation, userId);
 
     await this.conversationRepository.delete(conversationId);
 

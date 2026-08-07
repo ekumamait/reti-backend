@@ -10,9 +10,11 @@ import {
   IsEmail,
   MinLength,
   IsBoolean,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { StakeholderLinksDto } from './profile.dto';
+import { ParticipantDetailsDto } from './participant-details.dto';
 
 export class CreateProfileDto {
   @ApiProperty({ required: false })
@@ -107,24 +109,11 @@ export class CreateProfileDto {
     village?: string;
   };
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ type: ParticipantDetailsDto, required: false })
   @IsOptional()
-  @IsObject()
-  participantDetails?: {
-    nameOfParticipant?: string;
-    groupNumber?: string;
-    individualNumber?: string;
-    nin?: string;
-    sex?: string;
-    age?: string;
-    maritalStatus?: string;
-    specialInterestCategory?: string;
-    disabilityType?: string;
-    numberOfDisabilities?: string;
-    mainDisabilityDetails?: string;
-    nationalityCategory?: string;
-    uniqueIdNo?: string;
-  };
+  @ValidateNested()
+  @Type(() => ParticipantDetailsDto)
+  participantDetails?: ParticipantDetailsDto;
 
   @ApiProperty({ required: false })
   @IsOptional()

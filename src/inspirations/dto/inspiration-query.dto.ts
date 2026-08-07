@@ -17,6 +17,6 @@ export class InspirationQueryDto implements PaginationParams {
   sortOrder?: 'ASC' | 'DESC';
 
   @IsOptional()
-  @IsEnum(['createdAt', 'updatedAt', 'likes'])
+  @IsEnum(['createdAt', 'updatedAt', 'likesCount'])
   sortBy?: string;
 }

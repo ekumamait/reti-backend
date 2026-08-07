@@ -34,6 +34,11 @@ export const ERROR_MESSAGES = {
   PRODUCT_NOT_FOUND: (id: string) =>
     `Product with ID ${id} not found or already inactive`,
 
+  WELCOME_IMAGE_NOT_FOUND: (id: number) =>
+    `Welcome image with ID ${id} not found`,
+
+  INVALID_NIN: 'NIN must start with CM or CF followed by 12 characters',
+
   UNAUTHORIZED: 'You are not authorized to perform this action',
 };
 
@@ -79,4 +84,9 @@ export const SUCCESS_MESSAGES = {
   JOB_DELETED: 'Job successfully deleted',
   INSPIRATION_DELETED: (id: number) =>
     `Inspiration with ID ${id} deleted successfully`,
+  WELCOME_IMAGES_FOUND: 'Welcome images fetched successfully',
+  WELCOME_IMAGE_CREATED: 'Welcome image successfully created',
+  WELCOME_IMAGE_UPDATED: 'Welcome image successfully updated',
+  WELCOME_IMAGE_DELETED: (id: number) =>
+    `Welcome image with ID ${id} deleted successfully`,
 };

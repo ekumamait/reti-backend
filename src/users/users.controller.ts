@@ -22,6 +22,10 @@ import { ApiTags } from '@nestjs/swagger';
 import { UserQueryDto } from './dto/user-query.dto';
 import { PaginatedResponse } from '../common/pagination.util';
 import { User } from '../database/entities/user.entity';
+import { RequestWithUser } from '../common/types/types';
+import { Roles } from '../authentication/decorators/roles.decorator';
+import { RolesGuard } from '../authentication/guards/roles.guard';
+import { USER_ROLES } from '../common/constants';
 
 @ApiTags('v1/users')
 @Controller({ path: 'users', version: '1' })
@@ -72,15 +76,18 @@ export class UsersController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) updateUserDto: UpdateUserDto,
+    @Request() req: RequestWithUser,
   ): Promise<ApiResponse<UserDto>> {
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.update(id, updateUserDto, req.user);
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(USER_ROLES.SUPER)
   async remove(
     @Param('id', ParseIntPipe) id: number,
+    @Request() req: RequestWithUser,
   ): Promise<ApiResponse<UserDto>> {
-    return this.usersService.remove(id);
+    return this.usersService.remove(id, req.user);
   }
 }
