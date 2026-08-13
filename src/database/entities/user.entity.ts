@@ -10,7 +10,11 @@ import { Conversation } from './conversation.entity';
 import { Notification } from './notification.entity';
 import { Product } from './product.entity';
 import { Job } from './job.entity';
-import { IsPhoneNumber } from 'class-validator';
+import { Matches } from 'class-validator';
+import {
+  ERROR_MESSAGES,
+  UGANDA_PHONE_NUMBER_REGEX,
+} from '../../common/constants';
 import { MentorshipSession } from './mentorship-session.entity';
 import { Inspiration } from './inspiration.entity';
 import { Profile } from './profile.entity';
@@ -33,7 +37,9 @@ export class User {
   lastName: string;
 
   @Column({ unique: true })
-  @IsPhoneNumber(null)
+  @Matches(UGANDA_PHONE_NUMBER_REGEX, {
+    message: ERROR_MESSAGES.INVALID_PHONE_NUMBER,
+  })
   phoneNumber: string;
 
   @Column({ default: 'youth' })

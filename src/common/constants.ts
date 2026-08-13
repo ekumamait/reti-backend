@@ -1,3 +1,9 @@
+// Matches any Uganda mobile number in E.164 format (+256 followed by a 9-digit
+// subscriber number starting with 7), covering every 07x carrier series (070-079)
+// regardless of which specific ranges third-party libraries like libphonenumber-js
+// currently recognize as "allocated" — that metadata lags behind real-world SIM issuance.
+export const UGANDA_PHONE_NUMBER_REGEX = /^\+2567\d{8}$/;
+
 export const USER_ROLES = {
   YOUTH: 'youth',
   MENTOR: 'mentor',
@@ -38,6 +44,9 @@ export const ERROR_MESSAGES = {
     `Welcome image with ID ${id} not found`,
 
   INVALID_NIN: 'NIN must start with CM or CF followed by 12 characters',
+
+  INVALID_PHONE_NUMBER:
+    'Phone number must be a valid Ugandan mobile number (+256 followed by 9 digits)',
 
   UNAUTHORIZED: 'You are not authorized to perform this action',
 };

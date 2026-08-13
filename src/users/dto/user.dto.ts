@@ -8,11 +8,15 @@ import {
   MinLength,
   isInt,
   isNotEmpty,
-  IsPhoneNumber,
+  Matches,
   IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { USER_ROLES } from '../../common/constants';
+import {
+  ERROR_MESSAGES,
+  UGANDA_PHONE_NUMBER_REGEX,
+  USER_ROLES,
+} from '../../common/constants';
 
 export class UserDto {
   @IsInt()
@@ -27,7 +31,9 @@ export class UserDto {
   @IsNotEmpty()
   lastName: string;
 
-  @IsPhoneNumber()
+  @Matches(UGANDA_PHONE_NUMBER_REGEX, {
+    message: ERROR_MESSAGES.INVALID_PHONE_NUMBER,
+  })
   @IsNotEmpty()
   phoneNumber: string;
 
