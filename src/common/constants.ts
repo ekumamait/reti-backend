@@ -20,6 +20,14 @@ export enum MentorshipSessionStatus {
   CANCELED = 'CANCELED',
 }
 
+// Bump this whenever the Terms of Service / Privacy Policy content changes materially,
+// so we can tell which version of the terms an existing user actually agreed to.
+export const TERMS_VERSION = '1.0';
+
+export const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'retivate@muni.ac.ug';
+
+export const PASSWORD_RESET_TOKEN_TTL_MS = 30 * 60 * 1000;
+
 export const ERROR_MESSAGES = {
   USER_NOT_FOUND: (phoneNumber: string) =>
     `User with phone number ${phoneNumber} not found`,
@@ -49,6 +57,15 @@ export const ERROR_MESSAGES = {
     'Phone number must be a valid Ugandan mobile number (+256 followed by 9 digits)',
 
   UNAUTHORIZED: 'You are not authorized to perform this action',
+
+  TERMS_NOT_ACCEPTED:
+    'You must accept the Terms of Service and Privacy Policy to register',
+
+  INVALID_OR_EXPIRED_RESET_TOKEN:
+    'This password reset link is invalid or has expired',
+
+  SUPPORT_REQUEST_NOT_FOUND: (id: number) =>
+    `Support request with ID ${id} not found`,
 };
 
 export const SUCCESS_MESSAGES = {
@@ -98,4 +115,13 @@ export const SUCCESS_MESSAGES = {
   WELCOME_IMAGE_UPDATED: 'Welcome image successfully updated',
   WELCOME_IMAGE_DELETED: (id: number) =>
     `Welcome image with ID ${id} deleted successfully`,
+
+  SUPPORT_REQUEST_CREATED: 'Support request sent successfully',
+  SUPPORT_REQUEST_FOUND: 'Support request fetched successfully',
+  SUPPORT_REQUESTS_FOUND: 'Support requests fetched successfully',
+  SUPPORT_REQUEST_RESPONDED: 'Response sent successfully',
+
+  PASSWORD_RESET_EMAIL_SENT:
+    'If an account with that email exists, a password reset link has been sent.',
+  PASSWORD_RESET_SUCCESS: 'Password reset successfully',
 };

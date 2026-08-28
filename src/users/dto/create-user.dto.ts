@@ -7,6 +7,8 @@ import {
   IsInt,
   MinLength,
   Matches,
+  IsBoolean,
+  Equals,
 } from 'class-validator';
 import {
   ERROR_MESSAGES,
@@ -48,4 +50,8 @@ export class CreateUserDto {
   @MinLength(8)
   @IsNotEmpty()
   password: string;
+
+  @IsBoolean()
+  @Equals(true, { message: ERROR_MESSAGES.TERMS_NOT_ACCEPTED })
+  acceptedTerms: boolean;
 }

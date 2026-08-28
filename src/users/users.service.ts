@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -15,6 +14,7 @@ import { UserDto } from './dto/user.dto';
 import {
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
+  TERMS_VERSION,
   USER_ROLES,
 } from '../common/constants';
 import { returnResponse, ApiResponse } from '../common/response.util';
@@ -237,6 +237,9 @@ export class UsersService {
     const user = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
+      termsAccepted: true,
+      termsAcceptedAt: new Date(),
+      termsVersion: TERMS_VERSION,
     });
 
     const savedUser = await this.userRepository.save(user);
@@ -277,6 +280,10 @@ export class UsersService {
     });
 
     return returnResponse(200, SUCCESS_MESSAGES.USER_UPDATED, updatedUser);
+  }
+
+  async setPassword(userId: number, hashedPassword: string): Promise<void> {
+    await this.userRepository.update(userId, { password: hashedPassword });
   }
 
   async remove(id: number, requester: User): Promise<ApiResponse<UserDto>> {

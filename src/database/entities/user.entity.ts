@@ -48,6 +48,15 @@ export class User {
   @Column({ default: false })
   isOnboarded: boolean;
 
+  @Column({ default: false })
+  termsAccepted: boolean;
+
+  @Column({ type: 'timestamp', nullable: true })
+  termsAcceptedAt: Date | null;
+
+  @Column({ nullable: true })
+  termsVersion: string | null;
+
   @OneToMany(() => Notification, (notification) => notification.user, {
     cascade: true,
     onDelete: 'CASCADE',
