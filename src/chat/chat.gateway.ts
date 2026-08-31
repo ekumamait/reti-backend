@@ -8,6 +8,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { JwtService } from '@nestjs/jwt';
 import { ConversationsService } from '../conversations/conversations.service';
 import { CreateConversationDto } from '../conversations/dto/create-conversation.dto';
 
@@ -28,22 +29,43 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() io: Server;
   private onlineUsers = new Set<string>();
 
-  constructor(private readonly conversationsService: ConversationsService) {}
+  constructor(
+    private readonly conversationsService: ConversationsService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  private emitOnlineUsers() {
+    this.io.emit('online-users', Array.from(this.onlineUsers));
+  }
 
   handleConnection(client: Socket) {
-    const userId = client.handshake.query.userId as string;
-    if (userId) {
+    const token =
+      (client.handshake.auth?.token as string) ||
+      (client.handshake.query.token as string);
+
+    if (!token) {
+      client.disconnect();
+      return;
+    }
+
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: process.env.JWT_SECRET,
+      });
+      const userId = String(payload.sub);
       client.data.userId = userId;
-      this.onlineUsers[userId] = true;
-      this.io.emit('online-users', this.onlineUsers);
+      this.onlineUsers.add(userId);
+      this.emitOnlineUsers();
+    } catch {
+      client.disconnect();
     }
   }
 
   handleDisconnect(client: Socket) {
     const userId = client.data.userId;
     if (userId) {
-      delete this.onlineUsers[userId];
-      this.io.emit('online-users', this.onlineUsers);
+      this.onlineUsers.delete(userId);
+      this.emitOnlineUsers();
     }
   }
 
@@ -52,7 +74,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() createConversationDto: CreateConversationDto,
   ) {
-    const userId = client.data.userId;
+    const userId = Number(client.data.userId);
     const conversation = await this.conversationsService.createConversation(
       userId,
       createConversationDto,
@@ -66,8 +88,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleUserOnline(@ConnectedSocket() client: Socket) {
     const userId = client.data.userId;
     if (userId) {
-      this.onlineUsers[userId] = true;
-      this.io.emit('online-users', this.onlineUsers);
+      this.onlineUsers.add(userId);
+      this.emitOnlineUsers();
     }
   }
 
@@ -75,8 +97,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleUserOffline(@ConnectedSocket() client: Socket) {
     const userId = client.data.userId;
     if (userId) {
-      delete this.onlineUsers[userId];
-      this.io.emit('online-users', this.onlineUsers);
+      this.onlineUsers.delete(userId);
+      this.emitOnlineUsers();
     }
   }
 }

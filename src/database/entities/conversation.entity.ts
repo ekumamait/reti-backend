@@ -12,6 +12,7 @@ export class Conversation {
 
   @Column('jsonb', { nullable: true })
   messages: {
+    senderId: number;
     receiverId: number;
     id: number;
     content: string;

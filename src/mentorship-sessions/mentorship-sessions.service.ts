@@ -202,27 +202,26 @@ export class MentorshipSessionsService {
       relations: ['mentor', 'youth'],
     });
 
-    if (session.youth.id !== user.id && session.mentor.id !== user.id) {
+    if (!session) {
       throw new NotFoundException(`Session #${sessionId} not found`);
     }
 
-    if (!session) {
+    if (session.youth.id !== user.id && session.mentor.id !== user.id) {
       throw new UnauthorizedException(ERROR_MESSAGES.UNAUTHORIZED);
     }
 
-    if (session) {
-      await this.notificationService.create({
-        title: 'Session Deleted',
-        userId: session.mentor.id,
-        message: `Session with ${session.youth.firstName} has been deleted`,
-      });
+    await this.notificationService.create({
+      title: 'Session Deleted',
+      userId: session.mentor.id,
+      message: `Session with ${session.youth.firstName} has been deleted`,
+    });
 
-      await this.notificationService.create({
-        title: 'Session Deleted',
-        userId: session.youth.id,
-        message: `Session with ${session.mentor.firstName} has been deleted`,
-      });
-    }
+    await this.notificationService.create({
+      title: 'Session Deleted',
+      userId: session.youth.id,
+      message: `Session with ${session.mentor.firstName} has been deleted`,
+    });
+
     await this.mentorshipSessionRepository.remove(session);
     return returnResponse(200, 'Session deleted successfully');
   }

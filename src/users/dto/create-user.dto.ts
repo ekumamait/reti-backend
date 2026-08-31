@@ -6,9 +6,15 @@ import {
   IsDate,
   IsInt,
   MinLength,
-  IsPhoneNumber,
+  Matches,
+  IsBoolean,
+  Equals,
 } from 'class-validator';
-import { USER_ROLES } from '../../common/constants';
+import {
+  ERROR_MESSAGES,
+  UGANDA_PHONE_NUMBER_REGEX,
+  USER_ROLES,
+} from '../../common/constants';
 
 export class CreateUserDto {
   @IsString()
@@ -19,7 +25,9 @@ export class CreateUserDto {
   @IsNotEmpty()
   lastName: string;
 
-  @IsPhoneNumber()
+  @Matches(UGANDA_PHONE_NUMBER_REGEX, {
+    message: ERROR_MESSAGES.INVALID_PHONE_NUMBER,
+  })
   @IsNotEmpty()
   phoneNumber: string;
 
@@ -42,4 +50,8 @@ export class CreateUserDto {
   @MinLength(8)
   @IsNotEmpty()
   password: string;
+
+  @IsBoolean()
+  @Equals(true, { message: ERROR_MESSAGES.TERMS_NOT_ACCEPTED })
+  acceptedTerms: boolean;
 }

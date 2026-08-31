@@ -12,6 +12,7 @@ import { MentorshipSessionsModule } from './mentorship-sessions/mentorship-sessi
 import { ChatGateway } from './chat/chat.gateway';
 import { SupportModule } from './support/support.module';
 import { JobEmailModule } from './opportunity/opportunity.module';
+import { WelcomeImagesModule } from './welcome-images/welcome-images.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
@@ -63,6 +64,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     MentorshipSessionsModule,
     JobEmailModule,
     SupportModule,
+    WelcomeImagesModule,
   ],
   providers: [ChatGateway],
 })

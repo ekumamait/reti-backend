@@ -51,9 +51,9 @@ export class ProfileService {
 
   async findOne(id: number): Promise<any> {
     const profile = await this.profileRepository.findOne({ where: { id } });
-    console.log(profile, '>>>>>>>>>>');
 
-    if (!profile) throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
+    if (!profile)
+      throw new NotFoundException(ERROR_MESSAGES.PROFILE_NOT_FOUND(id));
     return profile;
   }
 

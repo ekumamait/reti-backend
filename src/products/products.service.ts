@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -17,6 +18,13 @@ import {
 } from '../common/pagination.util';
 import { ProductDto } from './dto/product.dto';
 import { UserDto } from 'src/users/dto/user.dto';
+import { USER_ROLES } from 'src/common/constants';
+
+const STAFF_ROLES: string[] = [
+  USER_ROLES.ADMIN,
+  USER_ROLES.SUPER,
+  USER_ROLES.STAFF,
+];
 
 @Injectable()
 export class ProductsService {
@@ -88,6 +96,7 @@ export class ProductsService {
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
+    requester: UserDto,
   ): Promise<ApiResponse<ProductDto>> {
     const product = await this.productsRepository.findOne({
       where: { id },
@@ -95,6 +104,15 @@ export class ProductsService {
 
     if (!product) {
       throw new NotFoundException(`Product #${id} not found`);
+    }
+
+    if (
+      product.userId !== requester.id &&
+      !STAFF_ROLES.includes(requester.role)
+    ) {
+      throw new ForbiddenException(
+        'You are not authorized to modify this product',
+      );
     }
 
     const updatedProduct = await this.productsRepository.save({
@@ -105,13 +123,25 @@ export class ProductsService {
     return returnResponse(200, 'Product updated successfully', updatedProduct);
   }
 
-  async remove(id: string): Promise<ApiResponse<ProductDto>> {
+  async remove(
+    id: string,
+    requester: UserDto,
+  ): Promise<ApiResponse<ProductDto>> {
     const product = await this.productsRepository.findOne({
       where: { id },
     });
 
     if (!product) {
       throw new NotFoundException(`Product #${id} not found`);
+    }
+
+    if (
+      product.userId !== requester.id &&
+      !STAFF_ROLES.includes(requester.role)
+    ) {
+      throw new ForbiddenException(
+        'You are not authorized to delete this product',
+      );
     }
 
     await this.productsRepository.remove(product);

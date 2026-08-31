@@ -3,8 +3,12 @@ import {
   IsEnum,
   IsOptional,
   MinLength,
-  IsPhoneNumber,
+  Matches,
 } from 'class-validator';
+import {
+  ERROR_MESSAGES,
+  UGANDA_PHONE_NUMBER_REGEX,
+} from '../../common/constants';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -16,7 +20,9 @@ export class UpdateUserDto {
   lastName?: string;
 
   @IsOptional()
-  @IsPhoneNumber()
+  @Matches(UGANDA_PHONE_NUMBER_REGEX, {
+    message: ERROR_MESSAGES.INVALID_PHONE_NUMBER,
+  })
   phoneNumber?: string;
 
   @IsOptional()

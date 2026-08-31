@@ -5,9 +5,9 @@ import { ProfileDto } from 'src/profile/dto/profile.dto';
 
 export async function generateProfilePDF(profile: ProfileDto): Promise<string> {
   const tempDir = path.join(__dirname, '../../temp');
-  // if (!fs.existsSync(tempDir)) {
-  //   fs.mkdirSync(tempDir, { recursive: true });
-  // }
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+  }
 
   const filePath = path.join(tempDir, `profile-${Date.now()}.pdf`);
   const stream = fs.createWriteStream(filePath);

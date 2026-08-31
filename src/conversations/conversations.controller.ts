@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ConversationsService } from './conversations.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
+import { EditMessageDto } from './dto/edit-message.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiResponse } from 'src/common/response.util';
@@ -53,22 +54,30 @@ export class ConversationsController {
   async editMessage(
     @Param('id') id: number,
     @Param('messageId') messageId: number,
-    @Body('content') newContent: string,
+    @Body() editMessageDto: EditMessageDto,
+    @Request() req: RequestWithUser,
   ): Promise<ApiResponse<ConversationDto>> {
-    return this.conversationsService.editMessage(id, messageId, newContent);
+    return this.conversationsService.editMessage(
+      id,
+      messageId,
+      editMessageDto.content,
+      req.user.id,
+    );
   }
 
   @Get(':id/messages')
   async getConversationMessages(
     @Param('id') id: number,
+    @Request() req: RequestWithUser,
   ): Promise<ApiResponse<any>> {
-    return this.conversationsService.getConversationMessages(id);
+    return this.conversationsService.getConversationMessages(id, req.user.id);
   }
 
   @Delete(':id')
   async deleteConversation(
     @Param('id') id: number,
+    @Request() req: RequestWithUser,
   ): Promise<ApiResponse<ConversationDto>> {
-    return this.conversationsService.deleteConversation(id);
+    return this.conversationsService.deleteConversation(id, req.user.id);
   }
 }

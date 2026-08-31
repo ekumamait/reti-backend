@@ -1,3 +1,9 @@
+// Matches any Uganda mobile number in E.164 format (+256 followed by a 9-digit
+// subscriber number starting with 7), covering every 07x carrier series (070-079)
+// regardless of which specific ranges third-party libraries like libphonenumber-js
+// currently recognize as "allocated" — that metadata lags behind real-world SIM issuance.
+export const UGANDA_PHONE_NUMBER_REGEX = /^\+2567\d{8}$/;
+
 export const USER_ROLES = {
   YOUTH: 'youth',
   MENTOR: 'mentor',
@@ -13,6 +19,14 @@ export enum MentorshipSessionStatus {
   COMPLETED = 'COMPLETED',
   CANCELED = 'CANCELED',
 }
+
+// Bump this whenever the Terms of Service / Privacy Policy content changes materially,
+// so we can tell which version of the terms an existing user actually agreed to.
+export const TERMS_VERSION = '1.0';
+
+export const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'retivate@muni.ac.ug';
+
+export const PASSWORD_RESET_TOKEN_TTL_MS = 30 * 60 * 1000;
 
 export const ERROR_MESSAGES = {
   USER_NOT_FOUND: (phoneNumber: string) =>
@@ -34,7 +48,24 @@ export const ERROR_MESSAGES = {
   PRODUCT_NOT_FOUND: (id: string) =>
     `Product with ID ${id} not found or already inactive`,
 
+  WELCOME_IMAGE_NOT_FOUND: (id: number) =>
+    `Welcome image with ID ${id} not found`,
+
+  INVALID_NIN: 'NIN must start with CM or CF followed by 12 characters',
+
+  INVALID_PHONE_NUMBER:
+    'Phone number must be a valid Ugandan mobile number (+256 followed by 9 digits)',
+
   UNAUTHORIZED: 'You are not authorized to perform this action',
+
+  TERMS_NOT_ACCEPTED:
+    'You must accept the Terms of Service and Privacy Policy to register',
+
+  INVALID_OR_EXPIRED_RESET_TOKEN:
+    'This password reset link is invalid or has expired',
+
+  SUPPORT_REQUEST_NOT_FOUND: (id: number) =>
+    `Support request with ID ${id} not found`,
 };
 
 export const SUCCESS_MESSAGES = {
@@ -79,4 +110,18 @@ export const SUCCESS_MESSAGES = {
   JOB_DELETED: 'Job successfully deleted',
   INSPIRATION_DELETED: (id: number) =>
     `Inspiration with ID ${id} deleted successfully`,
+  WELCOME_IMAGES_FOUND: 'Welcome images fetched successfully',
+  WELCOME_IMAGE_CREATED: 'Welcome image successfully created',
+  WELCOME_IMAGE_UPDATED: 'Welcome image successfully updated',
+  WELCOME_IMAGE_DELETED: (id: number) =>
+    `Welcome image with ID ${id} deleted successfully`,
+
+  SUPPORT_REQUEST_CREATED: 'Support request sent successfully',
+  SUPPORT_REQUEST_FOUND: 'Support request fetched successfully',
+  SUPPORT_REQUESTS_FOUND: 'Support requests fetched successfully',
+  SUPPORT_REQUEST_RESPONDED: 'Response sent successfully',
+
+  PASSWORD_RESET_EMAIL_SENT:
+    'If an account with that email exists, a password reset link has been sent.',
+  PASSWORD_RESET_SUCCESS: 'Password reset successfully',
 };

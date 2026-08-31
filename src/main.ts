@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { config } from 'dotenv';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 config();
 
@@ -16,6 +17,9 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+
+  // Ensure every error response uses the same { status, message, data } envelope as success responses
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Enable CORS
   const allowedOrigins = [
@@ -48,20 +52,6 @@ async function bootstrap() {
   // API versioning
   app.enableVersioning({
     type: VersioningType.URI,
-  });
-
-  // Handle 405 errors
-  // app.use((_req, res, _next) => {
-  //   res.status(405).json({ message: 'This URL does not exist' });
-  // });
-
-  // Handle server errors
-  app.use((err, _req, res, _next) => {
-    console.error(err);
-    res.status(500).json({
-      message:
-        'Oops! The problem is not on your side. Hang on, we will fix this soon',
-    });
   });
 
   await app.listen(3000);

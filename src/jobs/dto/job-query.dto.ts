@@ -18,7 +18,13 @@ export class JobQueryDto implements PaginationParams {
   search?: string;
 
   @IsOptional()
-  @IsString()
+  @IsEnum([
+    'title',
+    'location',
+    'createdAt',
+    'updatedAt',
+    'applicationDeadline',
+  ])
   sortBy?: string;
 
   @IsOptional()

@@ -1,7 +1,16 @@
-import { Controller, Post, Body, UseGuards, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Delete,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('v1/auth')
 @Controller({ path: 'auth', version: '1' })
@@ -23,5 +32,19 @@ export class AuthController {
   @Delete('logout')
   async logout(@Body() body: { userId: string }): Promise<any> {
     return this.authService.logout(body.userId);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(
+    @Body(ValidationPipe) dto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
+    return this.authService.forgotPassword(dto.email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body(ValidationPipe) dto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    return this.authService.resetPassword(dto.token, dto.newPassword);
   }
 }

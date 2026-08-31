@@ -51,12 +51,16 @@ export class ProductsController {
   async update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
+    @Request() req: RequestWithUser,
   ): Promise<ApiResponse<ProductDto>> {
-    return this.productsService.update(id, updateProductDto);
+    return this.productsService.update(id, updateProductDto, req.user);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<ApiResponse<ProductDto>> {
-    return this.productsService.remove(id);
+  async remove(
+    @Param('id') id: string,
+    @Request() req: RequestWithUser,
+  ): Promise<ApiResponse<ProductDto>> {
+    return this.productsService.remove(id, req.user);
   }
 }

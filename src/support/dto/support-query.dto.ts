@@ -1,7 +1,8 @@
-import { IsOptional, IsString, IsEnum } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
 import { PaginationParams } from '../../common/pagination.util';
+import { SupportRequestStatus } from '../../database/entities/support-request.entity';
 
-export class ProductQueryDto implements PaginationParams {
+export class SupportQueryDto implements PaginationParams {
   @IsOptional()
   page?: number;
 
@@ -9,18 +10,16 @@ export class ProductQueryDto implements PaginationParams {
   limit?: number;
 
   @IsOptional()
-  @IsString()
   search?: string;
-
-  @IsOptional()
-  @IsString()
-  category?: string;
 
   @IsOptional()
   @IsEnum(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC';
 
   @IsOptional()
-  @IsEnum(['name', 'price', 'stockQuantity', 'createdAt', 'updatedAt'])
   sortBy?: string;
+
+  @IsOptional()
+  @IsEnum(SupportRequestStatus)
+  status?: SupportRequestStatus;
 }
