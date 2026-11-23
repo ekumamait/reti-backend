@@ -1,0 +1,53 @@
+# Dependabot version updates for the backend.
+# Opens PRs against `dev` (the default branch for this repo).
+version: 2
+updates:
+  - package-ecosystem: "npm" # also covers yarn.lock (yarn classic)
+    directory: "/"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Africa/Kampala"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+    groups:
+      # One PR for all NestJS framework bumps, so they move together.
+      nestjs:
+        patterns:
+          - "@nestjs/*"
+          - "@nestjs-modules/*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Minor and patch bumps for everything else in one PR.
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Dev tooling majors (eslint, jest, prettier) need deliberate migrations.
+      - dependency-name: "eslint*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "jest*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "prettier"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Africa/Kampala"
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - "dependencies"
+      - "ci"

@@ -30,8 +30,8 @@ export class AuthController {
   }
 
   @Delete('logout')
-  async logout(@Body() body: { userId: string }): Promise<any> {
-    return this.authService.logout(body.userId);
+  async logout(@Body() body?: { userId?: string }): Promise<any> {
+    return this.authService.logout(body?.userId ?? '');
   }
 
   @Post('forgot-password')

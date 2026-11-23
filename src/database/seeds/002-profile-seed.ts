@@ -49,14 +49,6 @@ export default class CreateProfiles implements Seeder {
             trainingDuration: '6 months',
             trainingLocation: 'Urban Center',
           },
-          artisanDetails: {
-            categoryOfArtisan: 'Individual artisan',
-            nameOfHost: `Host ${i + 1}`,
-            villageOfArtisan: `Village ${i + 1}`,
-            subcountyOfArtisan: `Subcounty ${i + 1}`,
-            centerRefugeeSettlement: 'Bidibidi',
-            hostContact: '+256789456123',
-          },
           geoLocationDetails: {
             partnerResponsible: getRandomPartner(),
             region: 'Northern',

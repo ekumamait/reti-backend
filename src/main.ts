@@ -10,6 +10,12 @@ config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Keep idle upstream connections open longer than typical reverse-proxy
+  // (nginx) keep-alive windows, so a reused connection isn't closed mid-request.
+  const httpServer = app.getHttpServer();
+  httpServer.keepAliveTimeout = 65_000;
+  httpServer.headersTimeout = 66_000;
+
   // Enable validation pipes with transformation
   app.useGlobalPipes(
     new ValidationPipe({

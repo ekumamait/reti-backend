@@ -80,16 +80,6 @@ export class Profile {
   };
 
   @Column('jsonb', { nullable: true })
-  artisanDetails: {
-    categoryOfArtisan?: string;
-    nameOfHost?: string;
-    villageOfArtisan?: string;
-    subcountyOfArtisan?: string;
-    centerRefugeeSettlement?: string;
-    hostContact?: string;
-  };
-
-  @Column('jsonb', { nullable: true })
   geoLocationDetails: {
     partnerResponsible?: string;
     region?: string;
