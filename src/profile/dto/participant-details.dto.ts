@@ -1,4 +1,5 @@
 import { IsOptional, IsString, Matches, ValidateIf } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { ERROR_MESSAGES } from '../../common/constants';
 
@@ -19,6 +20,9 @@ export class ParticipantDetailsDto {
   individualNumber?: string;
 
   @ApiProperty({ required: false })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.replace(/\s+/g, '').toUpperCase() : value,
+  )
   @ValidateIf((o) => !!o.nin)
   @Matches(/^(CM|CF)[A-Z0-9]{12}$/, {
     message: ERROR_MESSAGES.INVALID_NIN,
