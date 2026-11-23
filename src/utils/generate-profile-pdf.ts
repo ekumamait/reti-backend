@@ -60,7 +60,6 @@ export async function generateProfilePDF(profile: ProfileDto): Promise<string> {
   }
 
   addObjectSection('Skills & Training', profile.skillsAndTraining);
-  addObjectSection('Artisan Details', profile.artisanDetails);
   addObjectSection('Geo-Location Details', profile.geoLocationDetails);
   addObjectSection('Participant Details', profile.participantDetails);
   addObjectSection('Training Centre Details', profile.trainingCentreDetails);

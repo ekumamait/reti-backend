@@ -87,18 +87,6 @@ export class CreateProfileDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsObject()
-  artisanDetails?: {
-    categoryOfArtisan?: string;
-    nameOfHost?: string;
-    villageOfArtisan?: string;
-    subcountyOfArtisan?: string;
-    centerRefugeeSettlement?: string;
-    hostContact?: string;
-  };
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsObject()
   geoLocationDetails?: {
     partnerResponsible?: string;
     region?: string;
